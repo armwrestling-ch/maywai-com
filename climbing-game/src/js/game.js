@@ -370,6 +370,25 @@ async function setup() {
 
   createLimbButtons();
   populateLevelSelect();
+  
+  // Check for custom level parameter or localStorage
+  const urlParams = new URLSearchParams(window.location.search);
+  const customLevel = urlParams.get('level');
+  
+  if (customLevel === 'custom') {
+    // Try to load custom level from localStorage
+    const customLevelData = localStorage.getItem('customLevel');
+    if (customLevelData) {
+      try {
+        const levelData = JSON.parse(customLevelData);
+        loadCustomLevel(levelData);
+        return;
+      } catch (error) {
+        console.error('Failed to load custom level:', error);
+      }
+    }
+  }
+  
   loadLevel("default");
 }
 
@@ -1173,6 +1192,66 @@ function populateLevelSelect() {
     }
     loadLevel(event.target.value);
   });
+}
+
+/**
+ * Load a custom level from level data
+ * @param {any} levelData
+ */
+function loadCustomLevel(levelData) {
+  if (!levelData || !levelData.holds || !Array.isArray(levelData.holds)) {
+    console.error('Invalid custom level data');
+    loadLevel("default");
+    return;
+  }
+
+  holds = [];
+  topHold = null;
+  gameWon = false;
+  totalMoves = 0;
+  torsoPushed = false; // Reset push state
+  wallHeight = levelData.wallHeight || 3000;
+
+  for (let h of levelData.holds) {
+    const hold = { x: h.x, y: h.y };
+    if (h.top) {
+      topHold = hold;
+    }
+    holds.push(hold);
+  }
+
+  // Make sure we have at least 4 starting holds + end hold
+  if (holds.length < 5) {
+    console.error('Custom level needs at least 4 starting holds + end hold');
+    loadLevel("default");
+    return;
+  }
+
+  // Starting holds are the first 4 holds in the array (not skipping any)
+  climber.limbs.leftArm.hold = holds[0];
+  climber.limbs.rightArm.hold = holds[1];
+  climber.limbs.leftLeg.hold = holds[2];
+  climber.limbs.rightLeg.hold = holds[3];
+
+  // Initialize target holds to null
+  climber.limbs.leftArm.targetHold = null;
+  climber.limbs.rightArm.targetHold = null;
+  climber.limbs.leftLeg.targetHold = null;
+  climber.limbs.rightLeg.targetHold = null;
+
+  updateTorso();
+
+  // Initialize torso position to target
+  climber.torso.x = climber.torsoTarget.x;
+  climber.torso.y = climber.torsoTarget.y;
+
+  // Initialize starting height and current height
+  startingHeight = climber.torso.y;
+  currentHeight = 0;
+
+  cameraOffsetY = -climber.torso.y + height / 2;
+  isAnimating = false; // Reset animation state
+  loop();
 }
 
 /**
