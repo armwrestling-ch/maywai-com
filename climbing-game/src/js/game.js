@@ -100,10 +100,10 @@ const levels = {
 
       // Starting holds - manually placed to ensure good starting position
       // Moved up from bottom to give more space below (was 2830, 2850, 2920, 2950)
-      h.push({ x: 150, y: 2330 }); // left arm
-      h.push({ x: 280, y: 2350 }); // right arm
       h.push({ x: 130, y: 2420 }); // left leg
       h.push({ x: 200, y: 2450 }); // right leg
+      h.push({ x: 150, y: 2330 }); // left arm
+      h.push({ x: 240, y: 2350 }); // right arm
 
       // Function to check if a new hold position is valid
       /**
@@ -217,10 +217,10 @@ const levels = {
     wallHeight: 1400,
     holds: [
       // Starting holds repositioned to center the player better with more floor space
-      { x: 150, y: 700 }, // left arm
-      { x: 190, y: 700 }, // right arm
       { x: 130, y: 850 }, // left leg
       { x: 180, y: 820 }, // right leg
+      { x: 150, y: 700 }, // left arm
+      { x: 190, y: 700 }, // right arm
 
       // Second layer
       { x: 90, y: 700 },
@@ -263,10 +263,10 @@ const levels = {
     wallHeight: 2500,
     holds: [
       // --- STARTING HOLDS ---
-      { x: 180, y: 1650 }, // left arm
-      { x: 220, y: 1650 }, // right arm
       { x: 170, y: 1720 }, // left leg
       { x: 230, y: 1720 }, // right leg
+      { x: 180, y: 1650 }, // left arm
+      { x: 220, y: 1650 }, // right arm
 
       // --- G (y: 1480 - 1600) - Mirrored on X-axis and adjusted
       { x: 240, y: 1480 },
@@ -1212,6 +1212,10 @@ function loadCustomLevel(levelData) {
   torsoPushed = false; // Reset push state
   wallHeight = levelData.wallHeight || 3000;
 
+  console.log(`Loading custom level with wallHeight: ${wallHeight}`);
+  console.log(`Level data wallHeight: ${levelData.wallHeight}`);
+  console.log(`Total holds in data: ${levelData.holds.length}`);
+
   for (let h of levelData.holds) {
     const hold = { x: h.x, y: h.y };
     if (h.top) {
@@ -1227,11 +1231,25 @@ function loadCustomLevel(levelData) {
     return;
   }
 
-  // Starting holds are the first 4 holds in the array (not skipping any)
-  climber.limbs.leftArm.hold = holds[0];
-  climber.limbs.rightArm.hold = holds[1];
-  climber.limbs.leftLeg.hold = holds[2];
-  climber.limbs.rightLeg.hold = holds[3];
+  // Find the first 4 non-end holds as starting holds
+  let startingHolds = [];
+  for (let hold of levelData.holds) {
+    if (!hold.top && startingHolds.length < 4) {
+      startingHolds.push({ x: hold.x, y: hold.y });
+    }
+  }
+
+  if (startingHolds.length < 4) {
+    console.error("Custom level needs at least 4 starting holds");
+    loadLevel("default");
+    return;
+  }
+
+  // Assign starting holds to limbs
+  climber.limbs.leftArm.hold = startingHolds[0];
+  climber.limbs.rightArm.hold = startingHolds[1];
+  climber.limbs.leftLeg.hold = startingHolds[2];
+  climber.limbs.rightLeg.hold = startingHolds[3];
 
   // Initialize target holds to null
   climber.limbs.leftArm.targetHold = null;
@@ -1249,7 +1267,16 @@ function loadCustomLevel(levelData) {
   startingHeight = climber.torso.y;
   currentHeight = 0;
 
+  // Set camera to center on starting position (where climber is)
   cameraOffsetY = -climber.torso.y + height / 2;
+
+  // Ensure camera is properly constrained
+  cameraOffsetY = constrain(cameraOffsetY, -wallHeight + height, 0);
+
+  console.log(
+    `Custom level loaded. Camera positioned at: ${cameraOffsetY}, Climber at: ${climber.torso.y}`
+  );
+
   isAnimating = false; // Reset animation state
   loop();
 }
@@ -1278,10 +1305,10 @@ function loadLevel(levelName) {
     holds.push(hold);
   }
 
-  climber.limbs.leftArm.hold = holds[0];
-  climber.limbs.rightArm.hold = holds[1];
-  climber.limbs.leftLeg.hold = holds[2];
-  climber.limbs.rightLeg.hold = holds[3];
+  climber.limbs.leftLeg.hold = holds[0];
+  climber.limbs.rightLeg.hold = holds[1];
+  climber.limbs.leftArm.hold = holds[2];
+  climber.limbs.rightArm.hold = holds[3];
 
   // Initialize target holds to null
   climber.limbs.leftArm.targetHold = null;

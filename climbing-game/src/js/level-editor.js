@@ -80,7 +80,7 @@ async function setup() {
   updateWallHeight();
   updateFloorPosition();
   updateStatus(
-    "Ready to create level. Add starting holds at the bottom.",
+    "Ready to create level. Place starting holds in order: 1=Left Arm, 2=Right Arm, 3=Left Leg, 4=Right Leg.",
     "info"
   );
 }
@@ -132,18 +132,22 @@ function updateFloorPosition() {
 }
 
 function drawEndHoldPreview() {
+  // Calculate where the end hold will actually be placed (50px above highest hold)
+  let highestExistingY = editorHolds.length > 0 ? getHighestNonEndHoldY() : 400;
+  let previewY = highestExistingY - 50;
+
   // Draw a preview of where the end hold will be placed
   fill(255, 215, 0, 150); // Semi-transparent gold
   stroke(255, 215, 0);
   strokeWeight(2);
-  ellipse(TOP_HOLD_COORDS.x, TOP_HOLD_COORDS.y, 25, 25);
+  ellipse(TOP_HOLD_COORDS.x, previewY, 25, 25);
 
   // Draw text
   fill(0);
   noStroke();
   textAlign(CENTER, CENTER);
   textSize(10);
-  text("END", TOP_HOLD_COORDS.x, TOP_HOLD_COORDS.y);
+  text("END", TOP_HOLD_COORDS.x, previewY);
 }
 
 function drawScrollBar() {
@@ -321,12 +325,20 @@ function drawHolds() {
 }
 
 function drawStartingHoldValidation() {
-  if (editorHolds.length < 4) return; // Need at least 4 starting holds
+  // Get the first 4 non-end holds from the original array
+  let firstFourHolds = [];
+  let count = 0;
+  for (let hold of editorHolds) {
+    if (!hold.top && count < 4) {
+      firstFourHolds.push(hold);
+      count++;
+    }
+  }
 
-  let startingHolds = editorHolds.slice(0, 4); // Get first 4 holds as starting holds
+  if (firstFourHolds.length < 4) return; // Need at least 4 starting holds
 
   // Check if starting holds are valid (reachable from each other)
-  let isValid = validateStartingHolds(startingHolds);
+  let isValid = validateStartingHolds(firstFourHolds);
 
   if (!isValid) {
     // Draw warning indicators
@@ -334,7 +346,7 @@ function drawStartingHoldValidation() {
     strokeWeight(3);
     noFill();
 
-    for (let hold of startingHolds) {
+    for (let hold of firstFourHolds) {
       ellipse(hold.x, hold.y, 30, 30);
     }
   }
@@ -399,22 +411,26 @@ function updateWallHeight() {
   }
 
   // Calculate required height based on actual holds
-  let highestY = getHighestHoldY();
-  let lowestY = getLowestHoldY();
+  let highestY = getHighestHoldY(); // Smallest Y value (top of screen)
+  let lowestY = getLowestHoldY();  // Largest Y value (bottom of screen)
 
-  // Smart padding that adjusts based on level content
-  let paddingTop = 100; // Reasonable space above highest hold
+  // Smart padding
+  let paddingTop = 100; // Space above highest hold
   let paddingBottom = 150; // Space below lowest hold for floor visibility
 
-  // Calculate the actual span of holds
-  let holdSpan = lowestY - highestY;
+  // Wall height should be: from top (Y=0) to lowest hold + bottom padding
+  // But we also need space above the highest hold (paddingTop)
+  let requiredHeightFromHolds = lowestY + paddingBottom;
+  let requiredHeightFromTop = Math.max(0, highestY - paddingTop);
+  
+  // The wall needs to accommodate both constraints
+  let requiredHeight = Math.max(requiredHeightFromHolds, height + 300); // Minimum 1000px
 
-  // Minimum height should accommodate viewport plus buffer
-  let minHeight = height + 300; // 700 + 300 = 1000px minimum
-
-  // Required height based on content with smart padding
-  let contentHeight = holdSpan + paddingTop + paddingBottom;
-  let requiredHeight = Math.max(minHeight, contentHeight);
+  console.log(`Wall height calculation:
+    highestY: ${highestY}, lowestY: ${lowestY}
+    requiredHeightFromHolds: ${requiredHeightFromHolds}
+    current editorWallHeight: ${editorWallHeight}
+    new requiredHeight: ${requiredHeight}`);
 
   // Be more aggressive about shrinking - smaller threshold for downward changes
   let heightDifference = Math.abs(editorWallHeight - requiredHeight);
@@ -441,9 +457,9 @@ function updateWallHeight() {
     // Provide feedback when significant changes occur
     if (Math.abs(oldHeight - editorWallHeight) > 200) {
       if (editorWallHeight > oldHeight) {
-        console.log("Level expanded to accommodate holds near top");
+        console.log(`Level expanded from ${oldHeight} to ${editorWallHeight}`);
       } else {
-        console.log("Level contracted to optimize size");
+        console.log(`Level contracted from ${oldHeight} to ${editorWallHeight}`);
       }
     }
   }
@@ -539,8 +555,11 @@ function setEditorMode(mode) {
   if (mode === "add") {
     addHoldBtn?.classList.add("active");
     if (editorHolds.length < 4) {
+      const limbNames = ["Left Arm", "Right Arm", "Left Leg", "Right Leg"];
       updateStatus(
-        `Click on the wall to add starting hold ${editorHolds.length + 1}/4.`,
+        `Click to place starting hold ${editorHolds.length + 1}/4 (${
+          limbNames[editorHolds.length]
+        }).`,
         "info"
       );
     } else {
@@ -593,12 +612,31 @@ function updateHoldInfo() {
   let info = `Holds: ${editorHolds.length} | Wall Height: ${editorWallHeight}px\n`;
 
   if (editorHolds.length > 0) {
-    let startingHolds = editorHolds.slice(0, Math.min(4, editorHolds.length));
+    // Get the first 4 non-end holds from the original array
+    let startingHolds = [];
+    let count = 0;
+    for (let hold of editorHolds) {
+      if (!hold.top && count < 4) {
+        startingHolds.push(hold);
+        count++;
+      }
+    }
+
     let isValid =
       startingHolds.length === 4 ? validateStartingHolds(startingHolds) : false;
+
+    const limbNames = ["L.Arm", "R.Arm", "L.Leg", "R.Leg"];
+    let holdList = "";
+    for (let i = 0; i < startingHolds.length; i++) {
+      holdList += `${i + 1}=${limbNames[i]} `;
+    }
+
     info += `Starting holds: ${startingHolds.length}/4 (${
       isValid ? "Valid" : "Invalid"
     })\n`;
+    if (startingHolds.length > 0) {
+      info += `Order: ${holdList.trim()}\n`;
+    }
   }
 
   info += `End hold: ${hasEndHold ? "Placed" : "Not placed"}\n`;
@@ -649,9 +687,9 @@ function placeEndHold() {
     return;
   }
 
-  // Calculate the topmost position (ensure it's above all existing holds)
+  // Calculate the topmost position (ensure it's 50px above all existing holds)
   let highestExistingY = editorHolds.length > 0 ? getHighestNonEndHoldY() : 400;
-  let endHoldY = Math.min(TOP_HOLD_COORDS.y, highestExistingY - 50); // At least 50px above highest hold
+  let endHoldY = highestExistingY - 50; // Exactly 50px above highest hold
 
   // Place the end hold at the calculated position
   let endHold = {
@@ -665,9 +703,9 @@ function placeEndHold() {
   updateWallHeight();
   updateFloorPosition();
   updateStatus(
-    `End hold placed at (${TOP_HOLD_COORDS.x}, ${Math.round(
-      endHoldY
-    )})! Level is now complete.`,
+    `End hold placed 50px above topmost hold at (${
+      TOP_HOLD_COORDS.x
+    }, ${Math.round(endHoldY)})! Level is now complete.`,
     "success"
   );
   setEditorMode("add"); // Return to add mode
@@ -724,6 +762,9 @@ function addHold(x, y) {
     // Adjust camera position to maintain view
     editorCameraOffsetY -= growthAmount;
 
+    // Update floor position immediately after growth
+    updateFloorPosition();
+
     updateStatus(
       `Level expanded by 700px to accommodate top placement!`,
       "info"
@@ -771,10 +812,11 @@ function addHold(x, y) {
   updateFloorPosition();
 
   if (editorHolds.length <= 4 && !hasEndHold) {
+    const limbNames = ["Left Arm", "Right Arm", "Left Leg", "Right Leg"];
     updateStatus(
-      `Starting hold ${editorHolds.length}/4 added at (${Math.round(
-        x
-      )}, ${Math.round(y)})`,
+      `${limbNames[editorHolds.length - 1]} starting hold (${
+        editorHolds.length
+      }/4) placed at (${Math.round(x)}, ${Math.round(y)})`,
       "success"
     );
   } else {
@@ -844,7 +886,7 @@ function selectHold(x, y) {
 }
 
 function testLevel() {
-  // Check if we have starting holds
+  // Check if we have enough holds (excluding end hold)
   let startingHolds = editorHolds.filter((hold) => !hold.top);
   if (startingHolds.length < 4) {
     updateStatus("Need at least 4 starting holds to test the level.", "error");
@@ -872,8 +914,21 @@ function testLevel() {
     return;
   }
 
-  // Validate starting holds positioning
-  let firstFourHolds = startingHolds.slice(0, 4);
+  // Validate starting holds positioning - get the first 4 non-end holds from the original array
+  let firstFourHolds = [];
+  let count = 0;
+  for (let hold of editorHolds) {
+    if (!hold.top && count < 4) {
+      firstFourHolds.push(hold);
+      count++;
+    }
+  }
+
+  if (firstFourHolds.length < 4) {
+    updateStatus("Need at least 4 starting holds to test the level.", "error");
+    return;
+  }
+
   if (!validateStartingHolds(firstFourHolds)) {
     updateStatus(
       "Starting holds are invalid - they're too far apart. Fix positioning first.",
@@ -1010,6 +1065,10 @@ function clearLevel() {
 
 function createLevelData() {
   let levelName = levelNameInput?.value.trim() || "Custom Level";
+
+  console.log(`Creating level data with wallHeight: ${editorWallHeight}`);
+  console.log(`Total holds: ${editorHolds.length}`);
+  console.log(`Hold positions:`, editorHolds.map(h => `(${h.x}, ${h.y}) ${h.top ? 'END' : ''}`));
 
   return {
     name: levelName,
