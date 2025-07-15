@@ -354,13 +354,62 @@ function getLowestHoldY() {
 }
 
 function updateWallHeight() {
-  // Auto-grow wall if holds are near the top
+  if (editorHolds.length === 0) {
+    // No holds placed yet - use minimum size
+    editorWallHeight = 1000; // Smaller minimum when empty
+    updateFloorPosition();
+    updateCamera();
+    return;
+  }
+  
+  // Calculate required height based on actual holds
   let highestY = getHighestHoldY();
-  let requiredHeight = Math.max(1400, highestY + 400); // Ensure 400px above highest hold
+  let lowestY = getLowestHoldY();
+  
+  // Smart padding that adjusts based on level content
+  let paddingTop = 100; // Reasonable space above highest hold
+  let paddingBottom = 150; // Space below lowest hold for floor visibility
+  
+  // Calculate the actual span of holds
+  let holdSpan = lowestY - highestY;
+  
+  // Minimum height should accommodate viewport plus buffer
+  let minHeight = height + 300; // 700 + 300 = 1000px minimum
+  
+  // Required height based on content with smart padding
+  let contentHeight = holdSpan + paddingTop + paddingBottom;
+  let requiredHeight = Math.max(minHeight, contentHeight);
+  
+  // Be more aggressive about shrinking - smaller threshold for downward changes
+  let heightDifference = Math.abs(editorWallHeight - requiredHeight);
+  let shouldUpdate = false;
   
   if (requiredHeight > editorWallHeight) {
+    // Growing: update immediately for better UX when placing holds near top
+    shouldUpdate = true;
+  } else if (requiredHeight < editorWallHeight && heightDifference > 100) {
+    // Shrinking: require bigger difference to avoid constant adjustments
+    shouldUpdate = true;
+  }
+  
+  if (shouldUpdate) {
+    let oldHeight = editorWallHeight;
     editorWallHeight = requiredHeight;
-    // No need to resize canvas - we keep it at 400x700 and scroll within it
+    
+    // Adjust camera if we're shrinking and camera is now out of bounds
+    let maxCameraOffsetY = -(editorWallHeight - height);
+    if (editorCameraOffsetY < maxCameraOffsetY) {
+      editorCameraOffsetY = maxCameraOffsetY;
+    }
+    
+    // Provide feedback when significant changes occur
+    if (Math.abs(oldHeight - editorWallHeight) > 200) {
+      if (editorWallHeight > oldHeight) {
+        console.log("Level expanded to accommodate holds near top");
+      } else {
+        console.log("Level contracted to optimize size");
+      }
+    }
   }
   
   updateFloorPosition();
@@ -368,7 +417,7 @@ function updateWallHeight() {
 }
 
 function getHighestHoldY() {
-  if (editorHolds.length === 0) return 1000;
+  if (editorHolds.length === 0) return 400; // Default high position
   return Math.min(...editorHolds.map(h => h.y));
 }
 
@@ -509,13 +558,22 @@ function placeEndHold() {
     return;
   }
   
-  // Place the end hold at the fixed position
-  let endHold = { ...TOP_HOLD_COORDS };
+  // Calculate the topmost position (ensure it's above all existing holds)
+  let highestExistingY = editorHolds.length > 0 ? getHighestHoldY() : 400;
+  let endHoldY = Math.min(TOP_HOLD_COORDS.y, highestExistingY - 50); // At least 50px above highest hold
+  
+  // Place the end hold at the calculated position
+  let endHold = { 
+    x: TOP_HOLD_COORDS.x, 
+    y: endHoldY, 
+    top: true 
+  };
   editorHolds.push(endHold);
   hasEndHold = true;
   
   updateWallHeight();
-  updateStatus("End hold placed! Level is now complete.", "success");
+  updateFloorPosition();
+  updateStatus(`End hold placed at (${TOP_HOLD_COORDS.x}, ${Math.round(endHoldY)})! Level is now complete.`, "success");
   setEditorMode('add'); // Return to add mode
 }
 
@@ -550,6 +608,27 @@ function mouseReleased() {
  * @param {number} y
  */
 function addHold(x, y) {
+  // Check if placing near the top - grow level by 700px if within 150px of top
+  if (y < 150) { // Within 150px of the top (y=0)
+    let growthAmount = 700;
+    
+    // Grow the level
+    editorWallHeight += growthAmount;
+    
+    // Adjust y position of the new hold
+    y += growthAmount;
+    
+    // Adjust positions of all existing holds
+    for (let hold of editorHolds) {
+      hold.y += growthAmount;
+    }
+    
+    // Adjust camera position to maintain view
+    editorCameraOffsetY -= growthAmount;
+    
+    updateStatus(`Level expanded by 700px to accommodate top placement!`, "info");
+  }
+  
   // Constrain to canvas bounds
   x = constrain(x, 10, width - 10);
   y = constrain(y, 10, editorWallHeight - 10);
@@ -558,6 +637,15 @@ function addHold(x, y) {
   if (y > floorY - 15) { // 15px buffer above floor
     updateStatus("Cannot place holds below the floor!", "error");
     return;
+  }
+  
+  // Check if hold would be too close to end hold (if placed)
+  if (hasEndHold) {
+    let endHold = editorHolds.find(h => h.top);
+    if (endHold && y < endHold.y + 20) {
+      updateStatus("Cannot place holds within 20px above the end hold!", "error");
+      return;
+    }
   }
   
   // Check if too close to existing holds
@@ -572,17 +660,16 @@ function addHold(x, y) {
   let newHold = { x: x, y: y };
   editorHolds.push(newHold);
   
-  updateWallHeight();
   updateFloorPosition();
   
-  if (editorHolds.length <= 4) {
+  if (editorHolds.length <= 4 && !hasEndHold) {
     updateStatus(`Starting hold ${editorHolds.length}/4 added at (${Math.round(x)}, ${Math.round(y)})`, "success");
   } else {
     updateStatus(`Hold added at (${Math.round(x)}, ${Math.round(y)})`, "success");
   }
   
   // Update mode status if we just finished placing starting holds
-  if (editorHolds.length === 4) {
+  if (editorHolds.length === 4 && !hasEndHold) {
     updateStatus("All starting holds placed! You can now add more holds or place the end hold.", "success");
   }
 }
@@ -601,8 +688,11 @@ function removeHold(x, y) {
       }
       
       editorHolds.splice(i, 1);
+      
+      // Optimize level size after removal
       updateWallHeight();
       updateFloorPosition();
+      
       updateStatus("Hold removed.", "success");
       return;
     }
@@ -632,42 +722,78 @@ function selectHold(x, y) {
 }
 
 function testLevel() {
-  // Validate level before testing
-  if (editorHolds.length < 4) {
-    updateStatus("Need at least 4 starting holds to test level.", "error");
+  // Check if we have starting holds
+  let startingHolds = editorHolds.filter(hold => !hold.top);
+  if (startingHolds.length < 4) {
+    updateStatus("Need at least 4 starting holds to test the level.", "error");
     return;
   }
   
+  // Check if end hold is placed
   if (!hasEndHold) {
-    updateStatus("Need to place end hold before testing level.", "error");
+    updateStatus("Need to place an end hold before testing. Click 'Place End Hold' button.", "error");
     return;
   }
   
-  let startingHolds = editorHolds.slice(0, 4);
-  if (!validateStartingHolds(startingHolds)) {
+  // Verify the end hold is the topmost hold
+  let endHold = editorHolds.find(hold => hold.top);
+  let otherHolds = editorHolds.filter(hold => !hold.top);
+  let highestOtherY = otherHolds.length > 0 ? getHighestHoldY() : 600;
+  
+  if (endHold && endHold.y >= highestOtherY - 20) {
+    updateStatus("End hold must be at least 20px above all other holds.", "error");
+    return;
+  }
+  
+  // Validate starting holds positioning
+  let firstFourHolds = startingHolds.slice(0, 4);
+  if (!validateStartingHolds(firstFourHolds)) {
     updateStatus("Starting holds are invalid - they're too far apart. Fix positioning first.", "error");
     return;
   }
+  
+  // All validation passed - test the level
+  updateStatus("Testing level...", "info");
   
   // Save level data to localStorage for testing
   let levelData = createLevelData();
   localStorage.setItem('customLevel', JSON.stringify(levelData));
   
   // Open game with custom level
-  updateStatus("Opening game to test level...", "success");
   setTimeout(() => {
     window.open('./index.html?level=custom', '_blank');
+    updateStatus("Level opened in new tab for testing!", "success");
   }, 500);
 }
 
 function exportLevel() {
-  if (editorHolds.length < 4) {
+  // Check if we have starting holds
+  let startingHolds = editorHolds.filter(hold => !hold.top);
+  if (startingHolds.length < 4) {
     updateStatus("Need at least 4 starting holds to export.", "error");
     return;
   }
   
+  // Check if end hold is placed
   if (!hasEndHold) {
-    updateStatus("Need to place end hold before exporting level.", "error");
+    updateStatus("Need to place an end hold before exporting. Click 'Place End Hold' button.", "error");
+    return;
+  }
+  
+  // Verify the end hold is the topmost hold
+  let endHold = editorHolds.find(hold => hold.top);
+  let otherHolds = editorHolds.filter(hold => !hold.top);
+  let highestOtherY = otherHolds.length > 0 ? getHighestHoldY() : 600;
+  
+  if (endHold && endHold.y >= highestOtherY - 20) {
+    updateStatus("End hold must be at least 20px above all other holds.", "error");
+    return;
+  }
+  
+  // Validate starting holds positioning
+  let firstFourHolds = startingHolds.slice(0, 4);
+  if (!validateStartingHolds(firstFourHolds)) {
+    updateStatus("Starting holds are invalid - they're too far apart. Fix positioning first.", "error");
     return;
   }
   
