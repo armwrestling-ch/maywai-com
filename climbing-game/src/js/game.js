@@ -579,20 +579,31 @@ function draw() {
 
   const heightInMeters = Math.round(currentHeight / 10) / 10;
 
-  // Display stats (moves and height)
-  fill(0);
-  textSize(16);
-  textAlign(LEFT, TOP);
-  text(`Moves: ${totalMoves}`, 10, 10);
-  text(`Height: ${heightInMeters}m`, 10, 30);
-
   if (gameWon) {
+    // Draw semi-transparent background for victory message
+    fill(0, 0, 0, 180); // Darker background for victory
+    noStroke();
+    rect(width / 2 - 180, 40, 360, 80, 10); // Wider centered rounded rectangle background
+
     fill(0, 180, 0, 255);
-    textSize(32);
+    textSize(24);
     textAlign(CENTER, CENTER);
     text("Victory!", width / 2, 60);
     text(`${totalMoves} moves, ${heightInMeters}m climbed!`, width / 2, 100);
     noLoop();
+  } else {
+    // Only show game stats when not in victory state
+    // Draw semi-transparent background for stats
+    fill(0, 0, 0, 150); // Black with 150/255 opacity
+    noStroke();
+    rect(5, 5, 140, 45, 5); // Rounded rectangle background
+
+    // Display stats (moves and height)
+    fill(255); // White text for better contrast
+    textSize(16);
+    textAlign(LEFT, TOP);
+    text(`Moves: ${totalMoves}`, 10, 10);
+    text(`Height: ${heightInMeters}m`, 10, 30);
   }
 }
 
