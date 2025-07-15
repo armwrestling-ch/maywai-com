@@ -23,6 +23,15 @@ body {
   cursor: pointer;
   font-size: 14px;
 }
+.body-button {
+  margin: 2px;
+  padding: 6px 10px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background-color: #eee;
+  cursor: pointer;
+  font-size: 14px;
+}
 .selected {
   background-color: #4caf50;
   color: white;

@@ -72,13 +72,15 @@ const climber = {
  * @property {string} name - The name of the level
  * @property {number} wallHeight - The height of the climbing wall
  * @property {Hold[]} holds - The holds available in the level
+ * @property {number} order - The order of the level (for sorting)
  * @typedef {Record<string, Level>} Levels
  *
  * @type {Levels}
  */
 const levels = {
-  default: {
-    name: "Default Wall",
+  generated: {
+    order: 1,
+    name: "Generated Challenge",
     wallHeight: 3000,
     holds: (() => {
       let h = [];
@@ -201,40 +203,39 @@ const levels = {
     })(),
   },
 
-  test: {
-    name: "Short Test Wall",
+  default: {
+    order: 0,
+    name: "Easy Wall",
     wallHeight: 1400,
     holds: [
       // Starting holds repositioned to center the player better with more floor space
       { x: 150, y: 700 }, // left arm
       { x: 190, y: 700 }, // right arm
-      { x: 130, y: 850 },
-      { x: 180, y: 820 },
+      { x: 130, y: 850 }, // left leg
+      { x: 180, y: 820 }, // right leg
 
       // Second layer
-
-      // Third layer
       { x: 90, y: 700 },
       { x: 230, y: 700 },
       { x: 300, y: 680 },
 
-      // Fourth layer - getting narrower
+      // Third layer - getting narrower
       { x: 140, y: 600 },
       { x: 200, y: 590 },
       { x: 260, y: 600 },
 
-      // Fifth layer
+      // Fourth layer
       { x: 120, y: 500 },
       { x: 180, y: 490 },
       { x: 240, y: 500 },
       { x: 280, y: 510 },
 
-      // Sixth layer - approaching the top
+      // Fifth layer - approaching the top
       { x: 150, y: 400 },
       { x: 210, y: 390 },
       { x: 270, y: 400 },
 
-      // Seventh layer
+      // Sixth layer
       { x: 130, y: 300 },
       { x: 200, y: 290 },
       { x: 250, y: 300 },
@@ -317,9 +318,9 @@ function draw() {
         /** @type {LimbName} */ (selectedLimb)
       )
     ) {
-      fill("lightgreen");
+      fill("#4CAF50");
     } else {
-      fill("sienna");
+      fill("#8B4513");
     }
     ellipse(h.x, h.y, 20, 20);
   }
@@ -330,9 +331,9 @@ function draw() {
     if (hold) {
       // Set color based on limb type
       if (limb === "leftArm" || limb === "rightArm") {
-        stroke("blue");
+        stroke("#3264C8");
       } else {
-        stroke("#333");
+        stroke("#444");
       }
 
       // Calculate limb attachment point based on limb type
@@ -452,7 +453,7 @@ function draw() {
   }
 
   // Draw torso as rounded rectangle
-  fill(50, 100, 200, 255);
+  fill(50, 100, 200, 255); // #3264C8
   noStroke();
   rectMode(CENTER);
   // rect(x, y, width, height, topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius)
@@ -957,12 +958,19 @@ function populateLevelSelect() {
     console.error("Level select element not found");
     return;
   }
-  for (let key in levels) {
-    const option = document.createElement("option");
-    option.value = key;
-    option.innerText = levels[key].name || key;
-    levelSelect.appendChild(option);
-  }
+  Object.entries(levels)
+    .sort((a, b) => {
+      return a[1].order - b[1].order;
+    })
+    .forEach(([key, level]) => {
+      const option = document.createElement("option");
+      option.value = key;
+      option.innerText =
+        (level.name || key) +
+        ` (~${Math.round((level.wallHeight - 850) / 10) / 10}m)`;
+      levelSelect.appendChild(option);
+    });
+
   levelSelect.addEventListener("change", (event) => {
     if (!(event.target instanceof HTMLSelectElement)) {
       console.error("Event target is not a select element");
