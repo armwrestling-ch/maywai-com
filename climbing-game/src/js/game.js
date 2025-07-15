@@ -370,25 +370,25 @@ async function setup() {
 
   createLimbButtons();
   populateLevelSelect();
-  
+
   // Check for custom level parameter or localStorage
   const urlParams = new URLSearchParams(window.location.search);
-  const customLevel = urlParams.get('level');
-  
-  if (customLevel === 'custom') {
+  const customLevel = urlParams.get("level");
+
+  if (customLevel === "custom") {
     // Try to load custom level from localStorage
-    const customLevelData = localStorage.getItem('customLevel');
+    const customLevelData = localStorage.getItem("customLevel");
     if (customLevelData) {
       try {
         const levelData = JSON.parse(customLevelData);
         loadCustomLevel(levelData);
         return;
       } catch (error) {
-        console.error('Failed to load custom level:', error);
+        console.error("Failed to load custom level:", error);
       }
     }
   }
-  
+
   loadLevel("default");
 }
 
@@ -1200,7 +1200,7 @@ function populateLevelSelect() {
  */
 function loadCustomLevel(levelData) {
   if (!levelData || !levelData.holds || !Array.isArray(levelData.holds)) {
-    console.error('Invalid custom level data');
+    console.error("Invalid custom level data");
     loadLevel("default");
     return;
   }
@@ -1222,7 +1222,7 @@ function loadCustomLevel(levelData) {
 
   // Make sure we have at least 4 starting holds + end hold
   if (holds.length < 5) {
-    console.error('Custom level needs at least 4 starting holds + end hold');
+    console.error("Custom level needs at least 4 starting holds + end hold");
     loadLevel("default");
     return;
   }

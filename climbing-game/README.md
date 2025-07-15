@@ -26,7 +26,7 @@ Create your own custom climbing levels with the built-in level editor:
 ### Level Editor Features
 
 - **Add Hold Mode (1)**: Click to place new holds anywhere above the floor
-- **Remove Hold Mode (2)**: Click holds to remove them  
+- **Remove Hold Mode (2)**: Click holds to remove them
 - **Move Hold Mode (3)**: Drag holds to reposition them
 - **Place End Hold Mode (4)**: Places the victory hold at the fixed top position
 - **Mouse wheel scrolling**: Navigate up and down the level canvas
@@ -46,6 +46,7 @@ Create your own custom climbing levels with the built-in level editor:
 ## Controls
 
 ### Game Controls
+
 - **1-4**: Select limbs (left arm, right arm, left leg, right leg)
 - **5 / Space**: Push torso up
 - **6**: Strafe torso left
@@ -53,8 +54,9 @@ Create your own custom climbing levels with the built-in level editor:
 - **8**: Relax torso to natural position
 
 ### Level Editor Controls
+
 - **1**: Add Hold mode
-- **2**: Remove Hold mode 
+- **2**: Remove Hold mode
 - **3**: Move Hold mode
 - **4**: Place End Hold mode
 - **Mouse Wheel**: Scroll up/down the level canvas

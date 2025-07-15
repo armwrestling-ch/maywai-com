@@ -100,36 +100,57 @@
   <body>
     <div id="editorUI">
       <div class="editor-section">
-        <strong>Level Editor</strong><br>
-        <input type="text" id="levelName" placeholder="Level Name" value="Custom Level">
-        
-        <div style="margin: 5px 0;">
+        <strong>Level Editor</strong><br />
+        <input
+          type="text"
+          id="levelName"
+          placeholder="Level Name"
+          value="Custom Level"
+        />
+
+        <div style="margin: 5px 0">
           <button class="editor-button" id="addHoldMode">Add Hold (1)</button>
-          <button class="editor-button" id="removeHoldMode">Remove Hold (2)</button>
+          <button class="editor-button" id="removeHoldMode">
+            Remove Hold (2)
+          </button>
           <button class="editor-button" id="moveHoldMode">Move Hold (3)</button>
-          <button class="editor-button" id="placeEndHold">Place End Hold (4)</button>
+          <button class="editor-button" id="placeEndHold">
+            Place End Hold (4)
+          </button>
         </div>
-        
-        <div style="margin: 5px 0;">
-          <button class="editor-button success" id="testLevel">Test Level</button>
+
+        <div style="margin: 5px 0">
+          <button class="editor-button success" id="testLevel">
+            Test Level
+          </button>
           <button class="editor-button" id="exportLevel">Export JSON</button>
           <button class="editor-button" id="importLevel">Import JSON</button>
-          <button class="editor-button danger" id="clearLevel">Clear All</button>
+          <button class="editor-button danger" id="clearLevel">
+            Clear All
+          </button>
         </div>
-        
-        <div style="margin: 5px 0; font-size: 11px;">
-          <input type="file" id="fileInput" accept=".json" style="display: none;">
-          Start by placing 4 starting holds at the bottom. Scroll with mouse wheel or arrow keys/WASD. End hold is placed at fixed position (200, 170).
+
+        <div style="margin: 5px 0; font-size: 11px">
+          <input
+            type="file"
+            id="fileInput"
+            accept=".json"
+            style="display: none"
+          />
+          Start by placing 4 starting holds at the bottom. Scroll with mouse
+          wheel or arrow keys/WASD. End hold is placed at fixed position (200,
+          170).
         </div>
       </div>
-      
+
       <div id="status" class="status-info">
-        Start by placing 4 starting holds at the bottom of the wall. Use mouse wheel or arrow keys/WASD to scroll.
+        Start by placing 4 starting holds at the bottom of the wall. Use mouse
+        wheel or arrow keys/WASD to scroll.
       </div>
-      
+
       <div id="holdInfo"></div>
     </div>
-    
+
     <div id="gameContainer">
       <!-- Canvas will be created by p5.js -->
     </div>
