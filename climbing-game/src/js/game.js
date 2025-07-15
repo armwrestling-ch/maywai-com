@@ -375,20 +375,32 @@ async function setup() {
   createLimbButtons();
   populateLevelSelect();
 
-  // Check for custom level parameter or localStorage
+  // Check for custom level parameter in URL
   const urlParams = new URLSearchParams(window.location.search);
   const customLevel = urlParams.get("level");
 
   if (customLevel === "custom") {
-    // Try to load custom level from localStorage
-    const customLevelData = localStorage.getItem("customLevel");
+    // Try to load custom level data from URL parameter
+    const customLevelData = urlParams.get("data");
     if (customLevelData) {
       try {
-        const levelData = JSON.parse(customLevelData);
+        const levelData = JSON.parse(decodeURIComponent(customLevelData));
         loadCustomLevel(levelData);
         return;
       } catch (error) {
-        console.error("Failed to load custom level:", error);
+        console.error("Failed to load custom level from URL:", error);
+      }
+    }
+    
+    // Fallback: try to load from localStorage for backward compatibility
+    const storedLevelData = localStorage.getItem("customLevel");
+    if (storedLevelData) {
+      try {
+        const levelData = JSON.parse(storedLevelData);
+        loadCustomLevel(levelData);
+        return;
+      } catch (error) {
+        console.error("Failed to load custom level from localStorage:", error);
       }
     }
   }

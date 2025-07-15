@@ -51,6 +51,8 @@ let removeHoldBtn = null;
 /** @type {HTMLButtonElement | null} */
 let moveHoldBtn = null;
 /** @type {HTMLButtonElement | null} */
+let shareBtn = null;
+/** @type {HTMLButtonElement | null} */
 let testBtn = null;
 /** @type {HTMLButtonElement | null} */
 let exportBtn = null;
@@ -508,6 +510,9 @@ function initializeUI() {
   placeEndHoldBtn = /** @type {HTMLButtonElement} */ (
     document.getElementById("placeEndHold")
   );
+  shareBtn = /** @type {HTMLButtonElement} */ (
+    document.getElementById("shareLevel")
+  );
   testBtn = /** @type {HTMLButtonElement} */ (
     document.getElementById("testLevel")
   );
@@ -539,6 +544,7 @@ function initializeUI() {
   removeHoldBtn?.addEventListener("click", () => setEditorMode("remove"));
   moveHoldBtn?.addEventListener("click", () => setEditorMode("move"));
   placeEndHoldBtn?.addEventListener("click", () => placeEndHold());
+  shareBtn?.addEventListener("click", shareLevel);
   testBtn?.addEventListener("click", testLevel);
   exportBtn?.addEventListener("click", exportLevel);
   importBtn?.addEventListener("click", () => fileInput?.click());
@@ -937,13 +943,13 @@ function testLevel() {
   // All validation passed - test the level
   updateStatus("Testing level...", "info");
 
-  // Save level data to localStorage for testing
+  // Create level data and encode it in the URL
   let levelData = createLevelData();
-  localStorage.setItem("customLevel", JSON.stringify(levelData));
+  let encodedLevel = encodeURIComponent(JSON.stringify(levelData));
 
-  // Open game with custom level
+  // Open game with level data in URL
   setTimeout(() => {
-    window.open("./index.html?level=custom", "_blank");
+    window.open(`./index.html?level=custom&data=${encodedLevel}`, "_blank");
     updateStatus("Level opened in new tab for testing!", "success");
   }, 500);
 }
@@ -999,6 +1005,59 @@ function exportLevel() {
   link.click();
 
   updateStatus("Level exported successfully!", "success");
+}
+
+function shareLevel() {
+  // Check if we have starting holds
+  let startingHolds = editorHolds.filter((hold) => !hold.top);
+  if (startingHolds.length < 4) {
+    updateStatus("Need at least 4 starting holds to share.", "error");
+    return;
+  }
+
+  // Check if end hold is placed by looking for actual hold with top property
+  let endHold = editorHolds.find((hold) => hold.top);
+  if (!endHold) {
+    updateStatus(
+      "Need to place an end hold before sharing. Click 'Place End Hold' button.",
+      "error"
+    );
+    return;
+  }
+
+  // Verify the end hold is the topmost hold
+  let highestOtherY = getHighestNonEndHoldY();
+
+  if (endHold.y >= highestOtherY - 20) {
+    updateStatus(
+      "End hold must be at least 20px above all other holds.",
+      "error"
+    );
+    return;
+  }
+
+  // Validate starting holds positioning
+  let firstFourHolds = startingHolds.slice(0, 4);
+  if (!validateStartingHolds(firstFourHolds)) {
+    updateStatus(
+      "Starting holds are invalid - they're too far apart. Fix positioning first.",
+      "error"
+    );
+    return;
+  }
+
+  let levelData = createLevelData();
+  let encodedLevel = encodeURIComponent(JSON.stringify(levelData));
+  let shareUrl = `${window.location.origin}${window.location.pathname.replace('level-editor.html', 'index.html')}?level=custom&data=${encodedLevel}`;
+
+  // Copy to clipboard
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    updateStatus("Shareable URL copied to clipboard!", "success");
+  }).catch(() => {
+    // Fallback: show the URL in a prompt for manual copying
+    prompt("Share this URL with others to let them play your level:", shareUrl);
+    updateStatus("Shareable URL generated!", "success");
+  });
 }
 
 function importLevel() {
@@ -1089,6 +1148,7 @@ function keyPressed() {
   else if (key === "3") setEditorMode("move");
   else if (key === "4") placeEndHold();
   else if (key === "t" || key === "T") testLevel();
+  else if (key === "s" || key === "S") shareLevel();
   else if (key === "e" || key === "E") exportLevel();
   else if (key === "c" || key === "C") clearLevel();
   else if (keyCode === UP_ARROW || key === "w" || key === "W") {
