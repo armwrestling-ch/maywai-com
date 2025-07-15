@@ -111,11 +111,6 @@ function draw() {
   // Draw validation indicators for starting holds
   drawStartingHoldValidation();
 
-  // Draw end hold placement preview if in place end hold mode
-  if (editorMode === "placeEnd") {
-    drawEndHoldPreview();
-  }
-
   pop();
 
   // Draw scroll bar (after pop so it's not affected by camera transform)
@@ -543,7 +538,7 @@ function initializeUI() {
   addHoldBtn?.addEventListener("click", () => setEditorMode("add"));
   removeHoldBtn?.addEventListener("click", () => setEditorMode("remove"));
   moveHoldBtn?.addEventListener("click", () => setEditorMode("move"));
-  placeEndHoldBtn?.addEventListener("click", () => setEditorMode("placeEnd"));
+  placeEndHoldBtn?.addEventListener("click", () => placeEndHold());
   testBtn?.addEventListener("click", testLevel);
   exportBtn?.addEventListener("click", exportLevel);
   importBtn?.addEventListener("click", () => fileInput?.click());
@@ -594,20 +589,6 @@ function setEditorMode(mode) {
       "Click and drag holds to move them. Cannot move end hold once placed.",
       "info"
     );
-  } else if (mode === "placeEnd") {
-    placeEndHoldBtn?.classList.add("active");
-    if (hasEndHold) {
-      updateStatus("End hold already placed!", "error");
-      setEditorMode("add");
-    } else if (editorHolds.length < 4) {
-      updateStatus(
-        "Need at least 4 starting holds before placing end hold.",
-        "error"
-      );
-      setEditorMode("add");
-    } else {
-      updateStatus("Click to place the end hold at the top.", "info");
-    }
   }
 }
 
@@ -653,7 +634,7 @@ function updateHoldInfo() {
     }
   }
 
-  info += `End hold: ${hasEndHold ? "Placed" : "Not placed"}\n`;
+  info += `End hold: ${editorHolds.some(hold => hold.top) ? "Placed" : "Not placed"}\n`;
   info += `Floor Y: ${Math.round(floorY)}px`;
 
   if (holdInfoDiv) {
@@ -676,8 +657,6 @@ function mousePressed() {
     removeHold(worldMouseX, worldMouseY);
   } else if (editorMode === "move") {
     selectHold(worldMouseX, worldMouseY);
-  } else if (editorMode === "placeEnd") {
-    placeEndHold();
   }
 }
 
@@ -693,7 +672,8 @@ function mouseWheel(event) {
 }
 
 function placeEndHold() {
-  if (hasEndHold) {
+  let hasEndHoldPlaced = editorHolds.some(hold => hold.top);
+  if (hasEndHoldPlaced) {
     updateStatus("End hold already placed!", "error");
     return;
   }
@@ -912,8 +892,9 @@ function testLevel() {
     return;
   }
 
-  // Check if end hold is placed
-  if (!hasEndHold) {
+  // Check if end hold is placed by looking for actual hold with top property
+  let endHold = editorHolds.find((hold) => hold.top);
+  if (!endHold) {
     updateStatus(
       "Need to place an end hold before testing. Click 'Place End Hold' button.",
       "error"
@@ -922,10 +903,9 @@ function testLevel() {
   }
 
   // Verify the end hold is the topmost hold
-  let endHold = editorHolds.find((hold) => hold.top);
   let highestOtherY = getHighestNonEndHoldY();
 
-  if (endHold && endHold.y >= highestOtherY - 20) {
+  if (endHold.y >= highestOtherY - 20) {
     updateStatus(
       "End hold must be at least 20px above all other holds.",
       "error"
@@ -978,8 +958,9 @@ function exportLevel() {
     return;
   }
 
-  // Check if end hold is placed
-  if (!hasEndHold) {
+  // Check if end hold is placed by looking for actual hold with top property
+  let endHold = editorHolds.find((hold) => hold.top);
+  if (!endHold) {
     updateStatus(
       "Need to place an end hold before exporting. Click 'Place End Hold' button.",
       "error"
@@ -988,10 +969,9 @@ function exportLevel() {
   }
 
   // Verify the end hold is the topmost hold
-  let endHold = editorHolds.find((hold) => hold.top);
   let highestOtherY = getHighestNonEndHoldY();
 
-  if (endHold && endHold.y >= highestOtherY - 20) {
+  if (endHold.y >= highestOtherY - 20) {
     updateStatus(
       "End hold must be at least 20px above all other holds.",
       "error"
@@ -1109,7 +1089,7 @@ function keyPressed() {
   if (key === "1") setEditorMode("add");
   else if (key === "2") setEditorMode("remove");
   else if (key === "3") setEditorMode("move");
-  else if (key === "4") setEditorMode("placeEnd");
+  else if (key === "4") placeEndHold();
   else if (key === "t" || key === "T") testLevel();
   else if (key === "e" || key === "E") exportLevel();
   else if (key === "c" || key === "C") clearLevel();
