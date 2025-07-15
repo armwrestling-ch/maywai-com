@@ -1,0 +1,28 @@
+{
+  "name": "climbing-game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/js/game.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc --project tsconfig.json",
+    "initialize": "tsc --init",
+    "start": "npx http-server -c-1 --ext nonexistent -o -p 3000 ./src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaggli/climbing-game.git"
+  },
+  "author": "Matthias Jäggli <matthias.jaeggli@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jaggli/climbing-game/issues"
+  },
+  "homepage": "https://github.com/jaggli/climbing-game#readme",
+  "devDependencies": {
+    "@types/p5": "^1.7.6",
+    "p5": "^2.0.3",
+    "typescript": "^5.8.3",
+    "http-server": "^14.1.1"
+  }
+}
