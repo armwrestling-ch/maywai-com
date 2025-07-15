@@ -89,10 +89,11 @@ const levels = {
       const wallHeight = 3000;
 
       // Starting holds - manually placed to ensure good starting position
-      h.push({ x: 150, y: 2830 }); // left arm
-      h.push({ x: 280, y: 2850 }); // right arm
-      h.push({ x: 130, y: 2920 }); // left leg
-      h.push({ x: 200, y: 2950 }); // right leg
+      // Moved up from bottom to give more space below (was 2830, 2850, 2920, 2950)
+      h.push({ x: 150, y: 2330 }); // left arm
+      h.push({ x: 280, y: 2350 }); // right arm
+      h.push({ x: 130, y: 2420 }); // left leg
+      h.push({ x: 200, y: 2450 }); // right leg
 
       // Function to check if a new hold position is valid
       /**
@@ -146,10 +147,10 @@ const levels = {
 
       for (
         let layer = 0;
-        layer < Math.floor((wallHeight - 200) / layerHeight);
+        layer < Math.floor((wallHeight - 700) / layerHeight); // Changed from 200 to 700 to account for more bottom space
         layer++
       ) {
-        let layerY = wallHeight - 200 - layer * layerHeight;
+        let layerY = wallHeight - 700 - layer * layerHeight; // Changed from 200 to 700
         let attemptsForLayer = 0;
         let holdsInLayer = 0;
 
@@ -169,7 +170,7 @@ const levels = {
       let additionalAttempts = 0;
       while (h.length < 100 && additionalAttempts < 200) {
         let newX = Math.random() * (wallWidth - 2 * holdSize) + holdSize;
-        let newY = Math.random() * (wallHeight - 300) + 100;
+        let newY = Math.random() * (wallHeight - 800) + 100; // Changed from 300 to 800 to account for more bottom space
 
         if (isValidPosition(newX, newY, h) && isClimbable(newX, newY, h)) {
           h.push({ x: newX, y: newY });
@@ -202,59 +203,48 @@ const levels = {
 
   test: {
     name: "Short Test Wall",
-    wallHeight: 1000,
+    wallHeight: 1400,
     holds: [
-      // Starting holds at bottom
-      { x: 100, y: 950 },
-      { x: 200, y: 950 },
-      { x: 300, y: 950 },
+      // Starting holds repositioned to center the player better with more floor space
+      { x: 150, y: 700 }, // left arm
+      { x: 190, y: 700 }, // right arm
+      { x: 130, y: 850 },
+      { x: 180, y: 820 },
 
       // Second layer
-      { x: 80, y: 850 },
-      { x: 150, y: 850 },
-      { x: 220, y: 860 },
-      { x: 290, y: 850 },
-      { x: 350, y: 840 },
 
       // Third layer
-      { x: 120, y: 750 },
-      { x: 180, y: 740 },
-      { x: 250, y: 750 },
-      { x: 320, y: 760 },
+      { x: 90, y: 700 },
+      { x: 230, y: 700 },
+      { x: 300, y: 680 },
 
-      // Fourth layer
-      { x: 90, y: 650 },
-      { x: 160, y: 640 },
-      { x: 230, y: 650 },
-      { x: 300, y: 630 },
+      // Fourth layer - getting narrower
+      { x: 140, y: 600 },
+      { x: 200, y: 590 },
+      { x: 260, y: 600 },
 
-      // Fifth layer - getting narrower
-      { x: 140, y: 550 },
-      { x: 200, y: 540 },
-      { x: 260, y: 550 },
+      // Fifth layer
+      { x: 120, y: 500 },
+      { x: 180, y: 490 },
+      { x: 240, y: 500 },
+      { x: 280, y: 510 },
 
-      // Sixth layer
-      { x: 120, y: 450 },
-      { x: 180, y: 440 },
-      { x: 240, y: 450 },
-      { x: 280, y: 460 },
+      // Sixth layer - approaching the top
+      { x: 150, y: 400 },
+      { x: 210, y: 390 },
+      { x: 270, y: 400 },
 
-      // Seventh layer - approaching the top
-      { x: 150, y: 350 },
-      { x: 210, y: 340 },
-      { x: 270, y: 350 },
-
-      // Eighth layer
-      { x: 130, y: 250 },
-      { x: 200, y: 240 },
-      { x: 250, y: 250 },
+      // Seventh layer
+      { x: 130, y: 300 },
+      { x: 200, y: 290 },
+      { x: 250, y: 300 },
 
       // Near top holds
-      { x: 160, y: 150 },
-      { x: 220, y: 140 },
+      { x: 160, y: 230 },
+      { x: 220, y: 220 },
 
       // Top hold
-      { x: 200, y: 50, top: true },
+      { x: 200, y: 170, top: true },
     ],
   },
 };
@@ -274,6 +264,46 @@ function draw() {
 
   push();
   translate(0, cameraOffsetY, 0);
+
+  // Draw climbing wall background
+  fill(220, 220, 220); // Light gray wall
+  noStroke();
+  rect(0, 0, width, wallHeight);
+
+  // Draw floor - position it dynamically based on starting holds
+  fill(139, 69, 19); // Brown color for the floor
+  noStroke();
+
+  // Find the lowest starting hold position (highest Y value since Y increases downward)
+  let lowestStartingY = 0;
+  if (holds.length >= 4) {
+    // Use the first 4 holds as starting holds
+    lowestStartingY = Math.max(holds[0].y, holds[1].y, holds[2].y, holds[3].y);
+  } else if (holds.length >= 3) {
+    // Use the first 3 holds for shorter levels
+    lowestStartingY = Math.max(holds[0].y, holds[1].y, holds[2].y);
+  } else if (holds.length > 0) {
+    // Fallback: use the lowest hold in the level
+    lowestStartingY = Math.max(...holds.map((h) => h.y));
+  }
+
+  // Position floor with some distance below the starting holds
+  const floorDistance = 100; // Distance between lowest starting hold and floor
+  const floorY = lowestStartingY + floorDistance;
+
+  // Ensure floor fits within wall boundaries
+  const availableFloorSpace = wallHeight - floorY;
+  const floorHeight = Math.min(200, availableFloorSpace); // Cap floor height to fit within wall
+
+  if (floorHeight > 0) {
+    rect(0, floorY, width, floorHeight);
+
+    // Add floor texture/pattern
+    fill(120, 60, 15); // Darker brown for pattern
+    for (let y = floorY; y < floorY + floorHeight; y += 20) {
+      rect(0, y, width, 2);
+    }
+  }
 
   // Draw holds
   for (let h of holds) {
