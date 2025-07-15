@@ -16,6 +16,7 @@
 /**
  * @typedef {Object} EditorLevel
  * @property {string} name - The name of the level
+ * @property {string} author - The author of the level
  * @property {number} wallHeight - The height of the climbing wall
  * @property {EditorHold[]} holds - The holds available in the level
  */
@@ -41,6 +42,8 @@ let floorY = 1200; // Initial floor position
 // UI elements
 /** @type {HTMLInputElement | null} */
 let levelNameInput = null;
+/** @type {HTMLInputElement | null} */
+let authorNameInput = null;
 /** @type {HTMLButtonElement | null} */
 let addHoldBtn = null;
 /** @type {HTMLButtonElement | null} */
@@ -412,7 +415,7 @@ function updateWallHeight() {
 
   // Calculate required height based on actual holds
   let highestY = getHighestHoldY(); // Smallest Y value (top of screen)
-  let lowestY = getLowestHoldY();  // Largest Y value (bottom of screen)
+  let lowestY = getLowestHoldY(); // Largest Y value (bottom of screen)
 
   // Smart padding
   let paddingTop = 100; // Space above highest hold
@@ -422,7 +425,7 @@ function updateWallHeight() {
   // But we also need space above the highest hold (paddingTop)
   let requiredHeightFromHolds = lowestY + paddingBottom;
   let requiredHeightFromTop = Math.max(0, highestY - paddingTop);
-  
+
   // The wall needs to accommodate both constraints
   let requiredHeight = Math.max(requiredHeightFromHolds, height + 300); // Minimum 1000px
 
@@ -459,7 +462,9 @@ function updateWallHeight() {
       if (editorWallHeight > oldHeight) {
         console.log(`Level expanded from ${oldHeight} to ${editorWallHeight}`);
       } else {
-        console.log(`Level contracted from ${oldHeight} to ${editorWallHeight}`);
+        console.log(
+          `Level contracted from ${oldHeight} to ${editorWallHeight}`
+        );
       }
     }
   }
@@ -492,6 +497,9 @@ function initializeUI() {
   // Get UI elements
   levelNameInput = /** @type {HTMLInputElement} */ (
     document.getElementById("levelName")
+  );
+  authorNameInput = /** @type {HTMLInputElement} */ (
+    document.getElementById("authorName")
   );
   addHoldBtn = /** @type {HTMLButtonElement} */ (
     document.getElementById("addHoldMode")
@@ -1033,6 +1041,9 @@ function importLevel() {
       if (levelData.name && levelNameInput) {
         levelNameInput.value = levelData.name;
       }
+      if (levelData.author && authorNameInput) {
+        authorNameInput.value = levelData.author;
+      }
 
       updateWallHeight();
       updateStatus("Level imported successfully!", "success");
@@ -1065,13 +1076,18 @@ function clearLevel() {
 
 function createLevelData() {
   let levelName = levelNameInput?.value.trim() || "Custom Level";
+  let authorName = authorNameInput?.value.trim() || "Anonymous";
 
   console.log(`Creating level data with wallHeight: ${editorWallHeight}`);
   console.log(`Total holds: ${editorHolds.length}`);
-  console.log(`Hold positions:`, editorHolds.map(h => `(${h.x}, ${h.y}) ${h.top ? 'END' : ''}`));
+  console.log(
+    `Hold positions:`,
+    editorHolds.map((h) => `(${h.x}, ${h.y}) ${h.top ? "END" : ""}`)
+  );
 
   return {
     name: levelName,
+    author: authorName,
     wallHeight: editorWallHeight,
     holds: editorHolds.map((hold) => ({ ...hold })), // Deep copy holds
   };

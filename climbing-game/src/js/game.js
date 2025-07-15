@@ -78,6 +78,7 @@ const climber = {
 /**
  * @typedef {Object} Level
  * @property {string} name - The name of the level
+ * @property {string} author - The author of the level
  * @property {number} wallHeight - The height of the climbing wall
  * @property {Hold[]} holds - The holds available in the level
  * @property {number} order - The order of the level (for sorting)
@@ -88,7 +89,8 @@ const climber = {
 const levels = {
   generated: {
     order: 1,
-    name: "Generated Challenge",
+    name: "Challenge",
+    author: "Generator",
     wallHeight: 3000,
     holds: (() => {
       let h = [];
@@ -214,6 +216,7 @@ const levels = {
   default: {
     order: 0,
     name: "Easy Wall",
+    author: "Mättu",
     wallHeight: 1400,
     holds: [
       // Starting holds repositioned to center the player better with more floor space
@@ -260,6 +263,7 @@ const levels = {
   galaxus: {
     order: 2,
     name: "GALAXUS Wall",
+    author: "Mättu",
     wallHeight: 2500,
     holds: [
       // --- STARTING HOLDS ---
@@ -1181,6 +1185,7 @@ function populateLevelSelect() {
       option.value = key;
       option.innerText =
         (level.name || key) +
+        ` - by ${level.author}` +
         ` (~${Math.round((level.wallHeight - 850) / 10) / 10}m)`;
       levelSelect.appendChild(option);
     });
