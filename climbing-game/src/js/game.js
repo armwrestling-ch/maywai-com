@@ -35,6 +35,10 @@ let startingHeight = 0;
 let currentHeight = 0;
 let torsoPushed = false; // Track if torso has been manually pushed
 
+// Animation variables
+let animationSpeed = 0.15; // How fast animations complete (0.1 = slower, 0.3 = faster)
+let isAnimating = false; // Prevent input during animations
+
 /**
  * @type {Partial<Record<LimbName, HTMLButtonElement>>}
  */
@@ -50,7 +54,10 @@ let pushButton = null;
  * @property {Object} torso - The climber's torso position
  * @property {number} torso.x - X position of the torso
  * @property {number} torso.y - Y position of the torso
- * @property {Record<LimbName, { hold: Hold | null, reach: number }>} limbs - The climber's limbs
+ * @property {Object} torsoTarget - Target position for torso animation
+ * @property {number} torsoTarget.x - Target X position of the torso
+ * @property {number} torsoTarget.y - Target Y position of the torso
+ * @property {Record<LimbName, { hold: Hold | null, reach: number, targetHold: Hold | null }>} limbs - The climber's limbs
  *
  */
 
@@ -59,11 +66,12 @@ let pushButton = null;
  */
 const climber = {
   torso: { x: 0, y: 0 },
+  torsoTarget: { x: 0, y: 0 },
   limbs: {
-    leftArm: { hold: null, reach: 80 },
-    rightArm: { hold: null, reach: 80 },
-    leftLeg: { hold: null, reach: 120 },
-    rightLeg: { hold: null, reach: 120 },
+    leftArm: { hold: null, reach: 80, targetHold: null },
+    rightArm: { hold: null, reach: 80, targetHold: null },
+    leftLeg: { hold: null, reach: 120, targetHold: null },
+    rightLeg: { hold: null, reach: 120, targetHold: null },
   },
 };
 
@@ -433,7 +441,12 @@ function draw() {
   // Draw limbs
   for (let limb in climber.limbs) {
     let hold = climber.limbs[/** @type {LimbName} */ (limb)].hold;
-    if (hold) {
+    let targetHold = climber.limbs[/** @type {LimbName} */ (limb)].targetHold;
+
+    // Use target hold for drawing if it exists (during animation)
+    let currentHold = targetHold || hold;
+
+    if (currentHold) {
       // Set color based on limb type
       if (limb === "leftArm" || limb === "rightArm") {
         stroke("#3264C8");
@@ -467,15 +480,15 @@ function draw() {
       let segmentLength = limbLength / 2; // Each segment is half of total reach
 
       // Calculate distance from attachment point to hold
-      let totalDistance = dist(attachmentX, attachmentY, hold.x, hold.y);
+      let totalDistance = dist(attachmentX, attachmentY, currentHold.x, currentHold.y);
 
       // Calculate angle from attachment point to hold
-      let angle = atan2(hold.y - attachmentY, hold.x - attachmentX);
+      let angle = atan2(currentHold.y - attachmentY, currentHold.x - attachmentX);
 
       // Calculate joint position using the limb's actual reach
       // Use law of cosines to find the joint position that makes both segments equal length
-      let dx = hold.x - attachmentX;
-      let dy = hold.y - attachmentY;
+      let dx = currentHold.x - attachmentX;
+      let dy = currentHold.y - attachmentY;
 
       // If the hold is within reach, calculate the bent limb position
       if (totalDistance <= limbLength) {
@@ -525,7 +538,7 @@ function draw() {
           // Lower leg (second segment) - thick (8px)
           strokeWeight(8);
           // Lower leg connects to the actual joint position
-          line(jointX, jointY, hold.x, hold.y);
+          line(jointX, jointY, currentHold.x, currentHold.y);
         } else {
           // Upper arm (first segment) - thick (8px)
           strokeWeight(8);
@@ -539,7 +552,7 @@ function draw() {
           // Forearm (second segment) - medium (6px)
           strokeWeight(6);
           // Forearm connects to the actual joint position
-          line(jointX, jointY, hold.x, hold.y);
+          line(jointX, jointY, currentHold.x, currentHold.y);
         }
       } else {
         // If hold is out of reach, draw straight line at maximum reach
@@ -574,6 +587,7 @@ function draw() {
 
   pop();
 
+  updateAnimations();
   updateTorso();
   updateCamera();
 
@@ -607,8 +621,45 @@ function draw() {
   }
 }
 
+function updateAnimations() {
+  // Update torso animation
+  climber.torso.x = lerp(climber.torso.x, climber.torsoTarget.x, animationSpeed);
+  climber.torso.y = lerp(climber.torso.y, climber.torsoTarget.y, animationSpeed);
+
+  // Check if animations are complete
+  let animationComplete = true;
+  const threshold = 0.5; // Distance threshold to consider animation complete
+
+  // Check torso animation
+  if (dist(climber.torso.x, climber.torso.y, climber.torsoTarget.x, climber.torsoTarget.y) > threshold) {
+    animationComplete = false;
+  }
+
+  // Check limb animations
+  for (let limb in climber.limbs) {
+    let limbData = climber.limbs[/** @type {LimbName} */ (limb)];
+    if (limbData.targetHold && limbData.hold !== limbData.targetHold) {
+      animationComplete = false;
+    }
+  }
+
+  // If all animations are complete, finalize the moves
+  if (animationComplete && isAnimating) {
+    isAnimating = false;
+    
+    // Finalize limb positions
+    for (let limb in climber.limbs) {
+      let limbData = climber.limbs[/** @type {LimbName} */ (limb)];
+      if (limbData.targetHold) {
+        limbData.hold = limbData.targetHold;
+        limbData.targetHold = null;
+      }
+    }
+  }
+}
+
 function updateTorso() {
-  // Only update torso position automatically if it hasn't been manually pushed
+  // Only update torso target position automatically if it hasn't been manually pushed
   // or if we need to recalculate due to a limb move
   if (!torsoPushed) {
     let sumX = 0,
@@ -623,20 +674,20 @@ function updateTorso() {
       }
     }
     if (count > 0) {
-      climber.torso.x = sumX / count;
-      climber.torso.y = sumY / count;
+      climber.torsoTarget.x = sumX / count;
+      climber.torsoTarget.y = sumY / count;
     }
   }
 }
 
 function updateCamera() {
   const targetY = -climber.torso.y + height / 2;
-  cameraOffsetY = lerp(cameraOffsetY, targetY, 0.1);
+  cameraOffsetY = lerp(cameraOffsetY, targetY, 0.08); // Slower camera movement for smoother feel
   cameraOffsetY = constrain(cameraOffsetY, -wallHeight + height, 0);
 }
 
 function mousePressed() {
-  if (gameWon) return;
+  if (gameWon || isAnimating) return; // Prevent input during animations
   const worldMouseY = mouseY - cameraOffsetY;
   let nearest = getNearestHold(mouseX, worldMouseY);
   if (
@@ -655,7 +706,10 @@ function mousePressed() {
       totalMoves++;
     }
 
-    climber.limbs[/** @type {LimbName} */ (selectedLimb)].hold = nearest;
+    // Start animation by setting target hold
+    climber.limbs[/** @type {LimbName} */ (selectedLimb)].targetHold = nearest;
+    climber.limbs[/** @type {LimbName} */ (selectedLimb)].hold = nearest; // Set immediately for canReach calculations
+    isAnimating = true;
 
     // If torso was pushed, check if we can safely reset to calculated position
     if (torsoPushed) {
@@ -710,7 +764,7 @@ function mousePressed() {
     // Update current height (lower Y values mean higher position)
     currentHeight = Math.max(
       0,
-      Math.round((startingHeight - climber.torso.y) / 10) * 10
+      Math.round((startingHeight - climber.torsoTarget.y) / 10) * 10
     );
 
     // Check for victory - both arms must be on the top hold
@@ -1044,6 +1098,8 @@ function updateButtonStyles() {
 }
 
 function keyPressed() {
+  if (isAnimating) return; // Prevent input during animations
+  
   if (key === "1") selectedLimb = "leftArm";
   else if (key === "2") selectedLimb = "rightArm";
   else if (key === "3") selectedLimb = "leftLeg";
@@ -1124,13 +1180,25 @@ function loadLevel(levelName) {
   climber.limbs.rightArm.hold = holds[1];
   climber.limbs.leftLeg.hold = holds[2];
   climber.limbs.rightLeg.hold = holds[3];
+  
+  // Initialize target holds to null
+  climber.limbs.leftArm.targetHold = null;
+  climber.limbs.rightArm.targetHold = null;
+  climber.limbs.leftLeg.targetHold = null;
+  climber.limbs.rightLeg.targetHold = null;
+  
   updateTorso();
+
+  // Initialize torso position to target
+  climber.torso.x = climber.torsoTarget.x;
+  climber.torso.y = climber.torsoTarget.y;
 
   // Initialize starting height and current height
   startingHeight = climber.torso.y;
   currentHeight = 0;
 
   cameraOffsetY = -climber.torso.y + height / 2;
+  isAnimating = false; // Reset animation state
   loop();
 }
 
@@ -1138,7 +1206,7 @@ function loadLevel(levelName) {
  * Push the torso to maximum height while keeping all limbs connected
  */
 function pushTorso() {
-  if (gameWon) return;
+  if (gameWon || isAnimating) return; // Prevent input during animations
 
   console.log("Push button clicked!"); // Debug log
 
@@ -1229,11 +1297,12 @@ function pushTorso() {
 
   if (finalY < climber.torso.y) {
     console.log("Moving torso up!");
-    climber.torso.x = centerX;
-    climber.torso.y = finalY;
+    climber.torsoTarget.x = centerX;
+    climber.torsoTarget.y = finalY;
 
     // Mark that torso has been pushed so it doesn't get recalculated automatically
     torsoPushed = true;
+    isAnimating = true;
 
     // Count this as a move
     totalMoves++;
@@ -1241,7 +1310,7 @@ function pushTorso() {
     // Update current height
     currentHeight = Math.max(
       0,
-      Math.round((startingHeight - climber.torso.y) / 10) * 10
+      Math.round((startingHeight - finalY) / 10) * 10
     );
   } else {
     console.log("Already at maximum height for current holds");
@@ -1252,7 +1321,7 @@ function pushTorso() {
  * Strafe the torso to the left while keeping all limbs connected
  */
 function strafeLeft() {
-  if (gameWon) return;
+  if (gameWon || isAnimating) return; // Prevent input during animations
 
   console.log("Strafe left button clicked!");
 
@@ -1337,11 +1406,12 @@ function strafeLeft() {
 
   if (finalX < climber.torso.x) {
     console.log("Moving torso left!");
-    climber.torso.x = finalX;
-    climber.torso.y = centerY;
+    climber.torsoTarget.x = finalX;
+    climber.torsoTarget.y = centerY;
 
     // Mark that torso has been pushed so it doesn't get recalculated automatically
     torsoPushed = true;
+    isAnimating = true;
 
     // Count this as a move
     totalMoves++;
@@ -1354,7 +1424,7 @@ function strafeLeft() {
  * Strafe the torso to the right while keeping all limbs connected
  */
 function strafeRight() {
-  if (gameWon) return;
+  if (gameWon || isAnimating) return; // Prevent input during animations
 
   console.log("Strafe right button clicked!");
 
@@ -1439,11 +1509,12 @@ function strafeRight() {
 
   if (finalX > climber.torso.x) {
     console.log("Moving torso right!");
-    climber.torso.x = finalX;
-    climber.torso.y = centerY;
+    climber.torsoTarget.x = finalX;
+    climber.torsoTarget.y = centerY;
 
     // Mark that torso has been pushed so it doesn't get recalculated automatically
     torsoPushed = true;
+    isAnimating = true;
 
     // Count this as a move
     totalMoves++;
@@ -1457,7 +1528,7 @@ function strafeRight() {
  * This removes all pushes and strafes, returning to the calculated centroid
  */
 function relaxTorso() {
-  if (gameWon) return;
+  if (gameWon || isAnimating) return; // Prevent input during animations
 
   console.log("Relax button clicked!");
 
@@ -1533,8 +1604,10 @@ function relaxTorso() {
     // Reset the push state
     torsoPushed = false;
 
-    // Recalculate torso position based on current limb holds
-    updateTorso();
+    // Set target to calculated position and start animation
+    climber.torsoTarget.x = calculatedTorsoX;
+    climber.torsoTarget.y = calculatedTorsoY;
+    isAnimating = true;
 
     // Count this as a move
     totalMoves++;
