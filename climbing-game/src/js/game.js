@@ -248,6 +248,111 @@ const levels = {
       { x: 200, y: 170, top: true },
     ],
   },
+
+  galaxus: {
+    order: 2,
+    name: "GALAXUS Wall",
+    wallHeight: 2500,
+    holds: [
+      // --- STARTING HOLDS ---
+      { x: 180, y: 1650 }, // left arm
+      { x: 220, y: 1650 }, // right arm
+      { x: 170, y: 1720 }, // left leg
+      { x: 230, y: 1720 }, // right leg
+
+      // --- G (y: 1480 - 1600) - Mirrored on X-axis and adjusted
+      { x: 240, y: 1480 },
+      { x: 210, y: 1480 },
+      { x: 180, y: 1480 }, // Bottom bar
+      { x: 160, y: 1500 },
+      { x: 150, y: 1530 },
+      { x: 150, y: 1560 }, // Left side
+      { x: 160, y: 1590 },
+      { x: 180, y: 1600 },
+      { x: 210, y: 1600 }, // Top bar
+      { x: 240, y: 1590 }, // Right side upper
+      { x: 240, y: 1560 }, // Right side middle
+      { x: 210, y: 1560 }, // Inner bar
+
+      // --- A (y: 1300 - 1420) - Closer to G
+      { x: 200, y: 1300 }, // Top point
+      { x: 180, y: 1330 },
+      { x: 160, y: 1360 },
+      { x: 140, y: 1390 },
+      { x: 120, y: 1420 }, // Left leg
+      { x: 220, y: 1330 },
+      { x: 240, y: 1360 },
+      { x: 260, y: 1390 },
+      { x: 280, y: 1420 }, // Right leg
+      // Cross-bar adjusted to avoid overlap
+      { x: 160, y: 1380 },
+      { x: 200, y: 1380 },
+      { x: 240, y: 1380 },
+
+      // --- L (y: 1120 - 1210) - Closer to A
+      { x: 150, y: 1120 },
+      { x: 150, y: 1150 },
+      { x: 150, y: 1180 },
+      { x: 150, y: 1210 }, // Vertical bar
+      { x: 180, y: 1210 },
+      { x: 210, y: 1210 },
+      { x: 240, y: 1210 }, // Horizontal bar
+
+      // --- A (y: 920 - 1040) - Closer to L
+      { x: 200, y: 920 }, // Top point
+      { x: 180, y: 950 },
+      { x: 160, y: 980 },
+      { x: 140, y: 1010 },
+      { x: 120, y: 1040 }, // Left leg
+      { x: 220, y: 950 },
+      { x: 240, y: 980 },
+      { x: 260, y: 1010 },
+      { x: 280, y: 1040 }, // Right leg
+      // Cross-bar adjusted to avoid overlap
+      { x: 160, y: 1000 },
+      { x: 200, y: 1000 },
+      { x: 240, y: 1000 },
+
+      // --- X (y: 720 - 840) - Closer to A
+      { x: 150, y: 720 },
+      { x: 170, y: 750 },
+      { x: 200, y: 780 },
+      { x: 230, y: 810 },
+      { x: 250, y: 840 }, // Diagonal \
+      { x: 250, y: 720 },
+      { x: 230, y: 750 },
+      { x: 170, y: 810 },
+      { x: 150, y: 840 }, // Diagonal /
+
+      // --- U (y: 520 - 640) - Closer to X
+      { x: 150, y: 520 },
+      { x: 150, y: 550 },
+      { x: 150, y: 580 }, // Left side
+      { x: 165, y: 610 },
+      { x: 180, y: 630 },
+      { x: 200, y: 640 },
+      { x: 220, y: 630 },
+      { x: 235, y: 610 }, // Curve
+      { x: 250, y: 580 },
+      { x: 250, y: 550 },
+      { x: 250, y: 520 }, // Right side
+
+      // --- S (y: 320 - 440) - Closer to U
+      { x: 250, y: 320 },
+      { x: 220, y: 320 },
+      { x: 190, y: 330 },
+      { x: 160, y: 350 }, // Top curve
+      { x: 180, y: 380 },
+      { x: 210, y: 410 },
+      { x: 240, y: 430 }, // Middle
+      { x: 220, y: 440 },
+      { x: 190, y: 440 },
+      { x: 160, y: 430 }, // Bottom curve
+
+      // --- TOP HOLD ---
+      { x: 200, y: 250, top: true },
+    ],
+  },
 };
 
 async function setup() {
