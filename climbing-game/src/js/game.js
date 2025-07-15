@@ -196,7 +196,7 @@ const levels = {
 
       // Fallback top hold if placement failed
       if (!topHoldPlaced) {
-        h.push({ x: 200, y: 40, top: true });
+        h.push({ x: 230, y: 40, top: true });
       }
 
       return h;
