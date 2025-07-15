@@ -33,6 +33,8 @@ let selectedLimb = "leftArm";
 let totalMoves = 0;
 let startingHeight = 0;
 let currentHeight = 0;
+/** @type {any | null} */
+let currentCustomLevelData = null; // Store current custom level data for editing
 let torsoPushed = false; // Track if torso has been manually pushed
 
 // Animation variables
@@ -374,6 +376,20 @@ async function setup() {
 
   createLimbButtons();
   populateLevelSelect();
+
+  // Set up edit level link
+  const editLevelLink = document.getElementById("editLevel");
+  if (editLevelLink) {
+    editLevelLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentCustomLevelData) {
+        // Encode the level data for the editor URL
+        const encodedLevel = encodeURIComponent(JSON.stringify(currentCustomLevelData));
+        const editorUrl = `./level-editor.html?data=${encodedLevel}`;
+        window.open(editorUrl, "_blank");
+      }
+    });
+  }
 
   // Check for custom level parameter in URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -1222,6 +1238,15 @@ function loadCustomLevel(levelData) {
     return;
   }
 
+  // Store the level data for editing
+  currentCustomLevelData = levelData;
+  
+  // Show the edit link
+  const editLinkDiv = document.getElementById("editLevelLink");
+  if (editLinkDiv) {
+    editLinkDiv.style.display = "block";
+  }
+
   holds = [];
   topHold = null;
   gameWon = false;
@@ -1306,6 +1331,13 @@ function loadCustomLevel(levelData) {
 function loadLevel(levelName) {
   let level = levels[levelName];
   if (!level) return;
+
+  // Clear custom level data and hide edit link
+  currentCustomLevelData = null;
+  const editLinkDiv = document.getElementById("editLevelLink");
+  if (editLinkDiv) {
+    editLinkDiv.style.display = "none";
+  }
 
   holds = [];
   topHold = null;

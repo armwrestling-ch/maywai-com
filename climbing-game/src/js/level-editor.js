@@ -84,10 +84,26 @@ async function setup() {
   initializeUI();
   updateWallHeight();
   updateFloorPosition();
-  updateStatus(
-    "Ready to create level. Place starting holds in order: 1=Left Arm, 2=Right Arm, 3=Left Leg, 4=Right Leg.",
-    "info"
-  );
+
+  // Check if level data is provided in URL (from "Edit this level" link)
+  const urlParams = new URLSearchParams(window.location.search);
+  const levelData = urlParams.get("data");
+  
+  if (levelData) {
+    try {
+      const decodedData = JSON.parse(decodeURIComponent(levelData));
+      loadLevelIntoEditor(decodedData);
+      updateStatus("Level loaded for editing!", "success");
+    } catch (error) {
+      console.error("Failed to load level from URL:", error);
+      updateStatus("Failed to load level from URL.", "error");
+    }
+  } else {
+    updateStatus(
+      "Ready to create level. Place starting holds in order: 1=Left Arm, 2=Right Arm, 3=Left Leg, 4=Right Leg.",
+      "info"
+    );
+  }
 }
 
 function draw() {
@@ -488,6 +504,42 @@ function updateCamera() {
     -editorWallHeight + height,
     0
   );
+}
+
+/**
+ * Load level data into the editor (used when editing existing levels)
+ * @param {any} levelData
+ */
+function loadLevelIntoEditor(levelData) {
+  if (!levelData || !levelData.holds || !Array.isArray(levelData.holds)) {
+    updateStatus("Invalid level data!", "error");
+    return;
+  }
+
+  // Clear current level
+  editorHolds = [];
+  hasEndHold = false;
+
+  // Load level data
+  editorHolds = [...levelData.holds];
+  hasEndHold = editorHolds.some(hold => hold.top);
+
+  // Set level name and author
+  if (levelData.name && levelNameInput) {
+    levelNameInput.value = levelData.name;
+  }
+  if (levelData.author && authorNameInput) {
+    authorNameInput.value = levelData.author;
+  }
+
+  // Set wall height if provided
+  if (levelData.wallHeight) {
+    editorWallHeight = levelData.wallHeight;
+  }
+
+  updateWallHeight();
+  updateFloorPosition();
+  updateCamera();
 }
 
 function initializeUI() {
