@@ -533,6 +533,12 @@ function initializeUI() {
     document.getElementById("holdInfo")
   );
 
+  // Stop event propagation for all clicks within the editor UI
+  const editorUI = document.getElementById("editorUI");
+  editorUI?.addEventListener("click", (e) => e.stopPropagation());
+  editorUI?.addEventListener("mousedown", (e) => e.stopPropagation());
+  editorUI?.addEventListener("mouseup", (e) => e.stopPropagation());
+
   // Set up event listeners
   addHoldBtn?.addEventListener("click", () => setEditorMode("add"));
   removeHoldBtn?.addEventListener("click", () => setEditorMode("remove"));
@@ -656,6 +662,11 @@ function updateHoldInfo() {
 }
 
 function mousePressed() {
+  // Only process mouse clicks that are within the canvas bounds
+  if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
+    return; // Click is outside canvas, ignore it
+  }
+
   let worldMouseX = mouseX;
   let worldMouseY = mouseY - editorCameraOffsetY;
 
