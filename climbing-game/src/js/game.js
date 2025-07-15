@@ -369,6 +369,53 @@ const levels = {
   },
 };
 
+/**
+ * Compress level data for URL sharing
+ * @param {any} levelData
+ * @returns {string}
+ */
+function compressLevelData(levelData) {
+  // Create a compressed format with shorter property names
+  const compressed = {
+    n: levelData.name || "Custom Level",
+    a: levelData.author || "Anonymous", 
+    h: levelData.wallHeight || 1400,
+    d: levelData.holds.map(/** @param {any} hold */ (hold) => [
+      Math.round(hold.x), 
+      Math.round(hold.y), 
+      hold.top ? 1 : 0
+    ])
+  };
+  
+  return JSON.stringify(compressed);
+}
+
+/**
+ * Decompress level data from URL
+ * @param {string} compressedData
+ * @returns {any}
+ */
+function decompressLevelData(compressedData) {
+  try {
+    const compressed = JSON.parse(compressedData);
+    
+    // Convert back to full format
+    return {
+      name: compressed.n || "Custom Level",
+      author: compressed.a || "Anonymous",
+      wallHeight: compressed.h || 1400,
+      holds: compressed.d.map(/** @param {any} holdArray */ (holdArray) => ({
+        x: holdArray[0],
+        y: holdArray[1],
+        top: holdArray[2] === 1
+      }))
+    };
+  } catch (error) {
+    console.error("Failed to decompress level data:", error);
+    return null;
+  }
+}
+
 async function setup() {
   // Create canvas and attach it to the gameContainer div
   let canvas = createCanvas(400, 700);
@@ -383,8 +430,9 @@ async function setup() {
     editLevelLink.addEventListener("click", (e) => {
       e.preventDefault();
       if (currentCustomLevelData) {
-        // Encode the level data for the editor URL
-        const encodedLevel = encodeURIComponent(JSON.stringify(currentCustomLevelData));
+        // Compress the level data for the editor URL
+        const compressedLevel = compressLevelData(currentCustomLevelData);
+        const encodedLevel = encodeURIComponent(compressedLevel);
         const editorUrl = `./level-editor.html?data=${encodedLevel}`;
         window.open(editorUrl, "_blank");
       }
@@ -400,9 +448,21 @@ async function setup() {
     const customLevelData = urlParams.get("data");
     if (customLevelData) {
       try {
-        const levelData = JSON.parse(decodeURIComponent(customLevelData));
-        loadCustomLevel(levelData);
-        return;
+        // Try decompressing first (new format), fallback to old format
+        let levelData;
+        try {
+          levelData = decompressLevelData(decodeURIComponent(customLevelData));
+        } catch (error) {
+          // Fallback to old uncompressed format
+          levelData = JSON.parse(decodeURIComponent(customLevelData));
+        }
+        
+        if (levelData) {
+          loadCustomLevel(levelData);
+          return;
+        } else {
+          throw new Error("Failed to decompress level data");
+        }
       } catch (error) {
         console.error("Failed to load custom level from URL:", error);
       }
@@ -1241,10 +1301,14 @@ function loadCustomLevel(levelData) {
   // Store the level data for editing
   currentCustomLevelData = levelData;
   
-  // Show the edit link
+  // Show the edit link and hide the create link
   const editLinkDiv = document.getElementById("editLevelLink");
+  const createLinkDiv = document.getElementById("createLevelLink");
   if (editLinkDiv) {
     editLinkDiv.style.display = "block";
+  }
+  if (createLinkDiv) {
+    createLinkDiv.style.display = "none";
   }
 
   holds = [];
@@ -1332,11 +1396,15 @@ function loadLevel(levelName) {
   let level = levels[levelName];
   if (!level) return;
 
-  // Clear custom level data and hide edit link
+  // Clear custom level data and show create link, hide edit link
   currentCustomLevelData = null;
   const editLinkDiv = document.getElementById("editLevelLink");
+  const createLinkDiv = document.getElementById("createLevelLink");
   if (editLinkDiv) {
     editLinkDiv.style.display = "none";
+  }
+  if (createLinkDiv) {
+    createLinkDiv.style.display = "block";
   }
 
   holds = [];

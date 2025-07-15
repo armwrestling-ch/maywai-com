@@ -73,6 +73,57 @@ let holdInfoDiv = null;
 const MAX_ARM_REACH = 80;
 const MAX_LEG_REACH = 120;
 
+/**
+ * Compress level data for URL sharing
+ * @param {any} levelData
+ * @returns {string}
+ */
+function compressLevelData(levelData) {
+  // Create a compressed format with shorter property names
+  const compressed = {
+    n: levelData.name || "Custom Level",
+    a: levelData.author || "Anonymous", 
+    h: levelData.wallHeight || 1400,
+    d: levelData.holds.map(/** @param {any} hold */ (hold) => [
+      Math.round(hold.x), 
+      Math.round(hold.y), 
+      hold.top ? 1 : 0
+    ])
+  };
+  
+  const compressedStr = JSON.stringify(compressed);
+  const originalStr = JSON.stringify(levelData);
+  console.log(`Compression: ${originalStr.length} → ${compressedStr.length} chars (${Math.round(100 - (compressedStr.length/originalStr.length)*100)}% smaller)`);
+  
+  return compressedStr;
+}
+
+/**
+ * Decompress level data from URL
+ * @param {string} compressedData
+ * @returns {any}
+ */
+function decompressLevelData(compressedData) {
+  try {
+    const compressed = JSON.parse(compressedData);
+    
+    // Convert back to full format
+    return {
+      name: compressed.n || "Custom Level",
+      author: compressed.a || "Anonymous",
+      wallHeight: compressed.h || 1400,
+      holds: compressed.d.map(/** @param {any} holdArray */ (holdArray) => ({
+        x: holdArray[0],
+        y: holdArray[1],
+        top: holdArray[2] === 1
+      }))
+    };
+  } catch (error) {
+    console.error("Failed to decompress level data:", error);
+    return null;
+  }
+}
+
 async function setup() {
   // Create canvas with fixed game dimensions and attach it to the gameContainer div
   let canvas = createCanvas(400, 700);
@@ -91,9 +142,21 @@ async function setup() {
   
   if (levelData) {
     try {
-      const decodedData = JSON.parse(decodeURIComponent(levelData));
-      loadLevelIntoEditor(decodedData);
-      updateStatus("Level loaded for editing!", "success");
+      // Try decompressing first (new format), fallback to old format
+      let decodedData;
+      try {
+        decodedData = decompressLevelData(decodeURIComponent(levelData));
+      } catch (error) {
+        // Fallback to old uncompressed format
+        decodedData = JSON.parse(decodeURIComponent(levelData));
+      }
+      
+      if (decodedData) {
+        loadLevelIntoEditor(decodedData);
+        updateStatus("Level loaded for editing!", "success");
+      } else {
+        throw new Error("Failed to decompress level data");
+      }
     } catch (error) {
       console.error("Failed to load level from URL:", error);
       updateStatus("Failed to load level from URL.", "error");
@@ -995,9 +1058,10 @@ function testLevel() {
   // All validation passed - test the level
   updateStatus("Testing level...", "info");
 
-  // Create level data and encode it in the URL
+  // Create level data and compress it for the URL
   let levelData = createLevelData();
-  let encodedLevel = encodeURIComponent(JSON.stringify(levelData));
+  let compressedLevel = compressLevelData(levelData);
+  let encodedLevel = encodeURIComponent(compressedLevel);
 
   // Open game with level data in URL
   setTimeout(() => {
@@ -1099,7 +1163,8 @@ function shareLevel() {
   }
 
   let levelData = createLevelData();
-  let encodedLevel = encodeURIComponent(JSON.stringify(levelData));
+  let compressedLevel = compressLevelData(levelData);
+  let encodedLevel = encodeURIComponent(compressedLevel);
   let shareUrl = `${window.location.origin}${window.location.pathname.replace('level-editor.html', 'index.html')}?level=custom&data=${encodedLevel}`;
 
   // Copy to clipboard
@@ -1165,6 +1230,16 @@ function clearLevel() {
     editorHolds = []; // Clear all holds
     selectedHold = null;
     hasEndHold = false;
+    
+    // Clear the URL parameters to start fresh
+    const url = new URL(window.location.href);
+    url.searchParams.delete('data');
+    window.history.replaceState({}, document.title, url.pathname);
+    
+    // Clear input fields
+    if (levelNameInput) levelNameInput.value = "Custom Level";
+    if (authorNameInput) authorNameInput.value = "";
+    
     updateWallHeight();
     updateFloorPosition();
     updateStatus(
