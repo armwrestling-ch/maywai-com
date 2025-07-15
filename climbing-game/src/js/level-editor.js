@@ -112,6 +112,9 @@ function draw() {
 
   pop();
 
+  // Draw scroll bar (after pop so it's not affected by camera transform)
+  drawScrollBar();
+
   // Draw UI info
   updateHoldInfo();
 }
@@ -138,6 +141,85 @@ function drawEndHoldPreview() {
   textAlign(CENTER, CENTER);
   textSize(10);
   text("END", TOP_HOLD_COORDS.x, TOP_HOLD_COORDS.y);
+}
+
+function drawScrollBar() {
+  // Only draw scroll bar if content is larger than viewport
+  if (editorWallHeight <= height) return;
+  
+  // Scroll bar dimensions and position
+  let scrollBarWidth = 12;
+  let scrollBarX = width - scrollBarWidth - 5;
+  let scrollBarY = 10;
+  let scrollBarHeight = height - 20; // Leave margins top and bottom
+  
+  // Calculate scroll bar track
+  fill(200, 200, 200, 150); // Semi-transparent gray track
+  noStroke();
+  rect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight, 6);
+  
+  // Calculate thumb position and size
+  let contentRatio = height / editorWallHeight; // How much of content fits in viewport
+  let thumbHeight = scrollBarHeight * contentRatio;
+  thumbHeight = max(thumbHeight, 20); // Minimum thumb height for visibility
+  
+  // Calculate thumb position based on current camera offset
+  let scrollProgress = abs(editorCameraOffsetY) / (editorWallHeight - height);
+  scrollProgress = constrain(scrollProgress, 0, 1);
+  let thumbY = scrollBarY + scrollProgress * (scrollBarHeight - thumbHeight);
+  
+  // Draw scroll thumb
+  fill(100, 100, 100, 180); // Semi-transparent dark gray thumb
+  rect(scrollBarX + 1, thumbY, scrollBarWidth - 2, thumbHeight, 5);
+  
+  // Add subtle highlight to thumb
+  fill(120, 120, 120, 100);
+  rect(scrollBarX + 2, thumbY + 1, scrollBarWidth - 4, 2, 2);
+  
+  // Draw level content indicators on scroll bar
+  drawScrollBarIndicators(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
+  
+  // Draw scroll position indicator text
+  fill(80, 80, 80);
+  noStroke();
+  textAlign(RIGHT, TOP);
+  textSize(10);
+  let currentY = Math.abs(editorCameraOffsetY);
+  let totalY = editorWallHeight;
+  text(`${Math.round(currentY)}/${Math.round(totalY)}`, width - scrollBarWidth - 8, 5);
+}
+
+/**
+ * @param {number} scrollBarX
+ * @param {number} scrollBarY  
+ * @param {number} scrollBarWidth
+ * @param {number} scrollBarHeight
+ */
+function drawScrollBarIndicators(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight) {
+  // Draw indicators for holds and floor on the scroll bar
+  
+  // Floor indicator
+  let floorPos = map(floorY, 0, editorWallHeight, scrollBarY, scrollBarY + scrollBarHeight);
+  stroke(139, 69, 19); // Brown floor color
+  strokeWeight(2);
+  line(scrollBarX - 2, floorPos, scrollBarX + scrollBarWidth + 2, floorPos);
+  
+  // Hold indicators
+  noStroke();
+  for (let i = 0; i < editorHolds.length; i++) {
+    let hold = editorHolds[i];
+    let holdPos = map(hold.y, 0, editorWallHeight, scrollBarY, scrollBarY + scrollBarHeight);
+    
+    if (hold.top) {
+      fill(255, 215, 0); // Gold for end hold
+    } else if (i < 4) {
+      fill(76, 175, 80); // Green for starting holds
+    } else {
+      fill(139, 69, 19); // Brown for regular holds
+    }
+    
+    ellipse(scrollBarX + scrollBarWidth/2, holdPos, 4, 4);
+  }
 }
 
 function drawFloor() {
