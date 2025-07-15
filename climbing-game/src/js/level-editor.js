@@ -580,7 +580,7 @@ function setEditorMode(mode) {
   } else if (mode === "remove") {
     removeHoldBtn?.classList.add("active");
     updateStatus(
-      "Click on holds to remove them. Cannot remove end hold once placed.",
+      "Click on holds to remove them.",
       "info"
     );
   } else if (mode === "move") {
@@ -842,21 +842,19 @@ function removeHold(x, y) {
   for (let i = 0; i < editorHolds.length; i++) {
     let hold = editorHolds[i];
     if (dist(x, y, hold.x, hold.y) < 15) {
-      if (hold.top) {
-        updateStatus(
-          "Cannot remove the end hold! Use clear to reset.",
-          "error"
-        );
-        return;
-      }
-
       editorHolds.splice(i, 1);
+
+      // Update hasEndHold flag if we removed the end hold
+      if (hold.top) {
+        hasEndHold = false;
+        updateStatus("End hold removed.", "success");
+      } else {
+        updateStatus("Hold removed.", "success");
+      }
 
       // Optimize level size after removal
       updateWallHeight();
       updateFloorPosition();
-
-      updateStatus("Hold removed.", "success");
       return;
     }
   }
