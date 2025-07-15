@@ -747,7 +747,7 @@ function canReach(torso, hold, reach, selectedLimb) {
   let attachmentY = torso.y;
   const torsoWidth = 36;
   const torsoHeight = 74;
-  const inset = 5; // Move attachment points 5px towards center
+  const inset = 9; // Use same inset as drawing for consistency
 
   if (selectedLimb === "leftArm") {
     attachmentX = torso.x - torsoWidth / 2 + inset;
