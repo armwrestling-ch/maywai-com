@@ -421,6 +421,12 @@ function getHighestHoldY() {
   return Math.min(...editorHolds.map(h => h.y));
 }
 
+function getHighestNonEndHoldY() {
+  let nonEndHolds = editorHolds.filter(hold => !hold.top);
+  if (nonEndHolds.length === 0) return 600; // Default position if no non-end holds
+  return Math.min(...nonEndHolds.map(h => h.y));
+}
+
 function updateCamera() {
   // Smooth camera movement within the fixed viewport
   editorCameraOffsetY = constrain(editorCameraOffsetY, -editorWallHeight + height, 0);
@@ -559,7 +565,7 @@ function placeEndHold() {
   }
   
   // Calculate the topmost position (ensure it's above all existing holds)
-  let highestExistingY = editorHolds.length > 0 ? getHighestHoldY() : 400;
+  let highestExistingY = editorHolds.length > 0 ? getHighestNonEndHoldY() : 400;
   let endHoldY = Math.min(TOP_HOLD_COORDS.y, highestExistingY - 50); // At least 50px above highest hold
   
   // Place the end hold at the calculated position
@@ -737,8 +743,7 @@ function testLevel() {
   
   // Verify the end hold is the topmost hold
   let endHold = editorHolds.find(hold => hold.top);
-  let otherHolds = editorHolds.filter(hold => !hold.top);
-  let highestOtherY = otherHolds.length > 0 ? getHighestHoldY() : 600;
+  let highestOtherY = getHighestNonEndHoldY();
   
   if (endHold && endHold.y >= highestOtherY - 20) {
     updateStatus("End hold must be at least 20px above all other holds.", "error");
@@ -782,8 +787,7 @@ function exportLevel() {
   
   // Verify the end hold is the topmost hold
   let endHold = editorHolds.find(hold => hold.top);
-  let otherHolds = editorHolds.filter(hold => !hold.top);
-  let highestOtherY = otherHolds.length > 0 ? getHighestHoldY() : 600;
+  let highestOtherY = getHighestNonEndHoldY();
   
   if (endHold && endHold.y >= highestOtherY - 20) {
     updateStatus("End hold must be at least 20px above all other holds.", "error");
