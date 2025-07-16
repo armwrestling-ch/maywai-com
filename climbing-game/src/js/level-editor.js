@@ -834,9 +834,13 @@ function mousePressed() {
     return; // Don't process as canvas click
   }
 
-  // Only process mouse clicks that are within the canvas bounds (excluding scrollbar)
-  if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
-    return; // Click is outside canvas, ignore it
+  // Only process mouse clicks that are within the canvas bounds (excluding scrollbar area)
+  /** @type {any} */
+  let scrollBarArea = getScrollBarDimensions();
+  let maxClickX = scrollBarArea ? scrollBarArea.x : width; // Exclude scrollbar area from clickable region
+  
+  if (mouseX < 0 || mouseX > maxClickX || mouseY < 0 || mouseY > height) {
+    return; // Click is outside valid canvas area, ignore it
   }
 
   let worldMouseX = mouseX;
@@ -924,7 +928,12 @@ function mouseDragged() {
     let worldMouseX = mouseX;
     let worldMouseY = mouseY - editorCameraOffsetY;
 
-    selectedHold.x = constrain(worldMouseX, 10, width - 10);
+    // Get scrollbar area to avoid placing holds behind it
+    /** @type {any} */
+    let scrollBarArea = getScrollBarDimensions();
+    let maxDragX = scrollBarArea ? scrollBarArea.x - 10 : width - 10; // Keep holds away from scrollbar
+
+    selectedHold.x = constrain(worldMouseX, 10, maxDragX);
     selectedHold.y = constrain(worldMouseY, 10, editorWallHeight - 10);
 
     // Check floor collision during drag
@@ -996,8 +1005,12 @@ function addHold(x, y) {
     );
   }
 
-  // Constrain to canvas bounds
-  x = constrain(x, 10, width - 10);
+  // Constrain to canvas bounds (excluding scrollbar area)
+  /** @type {any} */
+  let scrollBarArea = getScrollBarDimensions();
+  let maxX = scrollBarArea ? scrollBarArea.x - 10 : width - 10; // Keep holds away from scrollbar
+  
+  x = constrain(x, 10, maxX);
   y = constrain(y, 10, editorWallHeight - 10);
 
   // Check if hold would be below floor

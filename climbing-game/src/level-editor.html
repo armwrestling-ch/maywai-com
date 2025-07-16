@@ -8,12 +8,12 @@
     <style>
       #editorUI {
         position: absolute;
-        bottom: 10px;
+        bottom: 5px;
         left: 50%;
         width: 380px;
         z-index: 10;
         background: rgba(255, 255, 255, 0.95);
-        padding: 10px;
+        padding: 5px 10px;
         border-radius: 8px;
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
         text-align: center;
@@ -100,41 +100,43 @@
   <body>
     <div id="editorUI">
       <div class="editor-section">
-        <strong>Level Editor</strong><br /><br />
-        <input
-          type="text"
-          id="levelName"
-          placeholder="Level Name"
-          value="Custom Level"
-        />&nbsp;
-        <input type="text" id="authorName" placeholder="Author Name" value="" />
-
-        <div style="margin: 10px 0">
-          <button class="editor-button" id="addHoldMode">Add Hold (1)</button>
-          <button class="editor-button" id="removeHoldMode">
-            Remove Hold (2)
-          </button>
-          <br />
-          <button class="editor-button" id="moveHoldMode">Move Hold (3)</button>
-          <button class="editor-button" id="placeEndHold">
-            Place End Hold (4)
-          </button>
+        <strong>Level Editor</strong><br />
+        <div style="margin: 6px 0">
+          <input
+            type="text"
+            id="levelName"
+            placeholder="Level Name"
+            value="Custom Level"
+          />&nbsp;
+          <input
+            type="text"
+            id="authorName"
+            placeholder="Author Name"
+            value=""
+          />
         </div>
 
-        <div style="margin: 10px 0">
-          <button class="editor-button" id="exportLevel">Export JSON</button>
-          <button class="editor-button" id="importLevel">Import JSON</button>
-          <br />
-          <button class="editor-button" id="shareLevel">Share URL</button>
+        <div style="margin: 6px 0">
+          <button class="editor-button" id="addHoldMode">Add (1)</button>
+          <button class="editor-button" id="removeHoldMode">Remove (2)</button>
+          <button class="editor-button" id="moveHoldMode">Move (3)</button>
+          <button class="editor-button" id="placeEndHold">Add End (4)</button>
+        </div>
+
+        <div style="margin: 6px 0">
+          <button class="editor-button" id="shareLevel">Share</button>
           <button class="editor-button success" id="testLevel">
             Test Level
           </button>
+          <br />
+          <button class="editor-button" id="exportLevel">Export</button>
+          <button class="editor-button" id="importLevel">Import</button>
           <button class="editor-button danger" id="clearLevel">
             Clear All
           </button>
         </div>
 
-        <div style="margin: 10px 0; font-size: 11px">
+        <div style="margin: 6px 0; font-size: 11px">
           <input
             type="file"
             id="fileInput"
