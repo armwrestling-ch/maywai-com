@@ -21,6 +21,11 @@
  * @property {EditorHold[]} holds - The holds available in the level
  */
 
+// Scrollbar interaction variables
+let scrollBarDragging = false;
+let scrollBarStartY = 0;
+let scrollBarStartCameraY = 0;
+
 // Editor state
 let editorMode = "add"; // 'add', 'remove', 'move'
 /** @type {EditorHold[]} */
@@ -233,34 +238,40 @@ function drawScrollBar() {
   // Only draw scroll bar if content is larger than viewport
   if (editorWallHeight <= height) return;
 
-  // Scroll bar dimensions and position
-  let scrollBarWidth = 12;
+  // Scroll bar dimensions and position (wider for touch)
+  let scrollBarWidth = 20; // Increased from 12 to 20
   let scrollBarX = width - scrollBarWidth - 5;
   let scrollBarY = 10;
   let scrollBarHeight = height - 20; // Leave margins top and bottom
 
   // Calculate scroll bar track
-  fill(200, 200, 200, 150); // Semi-transparent gray track
+  fill(200, 200, 200, 180); // More opaque for better visibility
   noStroke();
-  rect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight, 6);
+  rect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight, 8);
 
   // Calculate thumb position and size
   let contentRatio = height / editorWallHeight; // How much of content fits in viewport
   let thumbHeight = scrollBarHeight * contentRatio;
-  thumbHeight = max(thumbHeight, 20); // Minimum thumb height for visibility
+  thumbHeight = max(thumbHeight, 30); // Increased minimum thumb height for touch
 
   // Calculate thumb position based on current camera offset
   let scrollProgress = abs(editorCameraOffsetY) / (editorWallHeight - height);
   scrollProgress = constrain(scrollProgress, 0, 1);
   let thumbY = scrollBarY + scrollProgress * (scrollBarHeight - thumbHeight);
 
-  // Draw scroll thumb
-  fill(100, 100, 100, 180); // Semi-transparent dark gray thumb
-  rect(scrollBarX + 1, thumbY, scrollBarWidth - 2, thumbHeight, 5);
+  // Highlight thumb if being dragged
+  if (scrollBarDragging) {
+    fill(80, 80, 80, 220); // Darker when dragging
+  } else if (isMouseOverScrollBarArea(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight)) {
+    fill(120, 120, 120, 200); // Lighter when hovered
+  } else {
+    fill(100, 100, 100, 180); // Normal state
+  }
+  rect(scrollBarX + 2, thumbY, scrollBarWidth - 4, thumbHeight, 6);
 
-  // Add subtle highlight to thumb
-  fill(120, 120, 120, 100);
-  rect(scrollBarX + 2, thumbY + 1, scrollBarWidth - 4, 2, 2);
+  // Add subtle highlight to thumb for better visual feedback
+  fill(140, 140, 140, 120);
+  rect(scrollBarX + 3, thumbY + 2, scrollBarWidth - 6, 3, 3);
 
   // Draw level content indicators on scroll bar
   drawScrollBarIndicators(
@@ -282,6 +293,47 @@ function drawScrollBar() {
     width - scrollBarWidth - 8,
     5
   );
+}
+
+/**
+ * Check if mouse is over the scrollbar area
+ * @param {number} scrollBarX
+ * @param {number} scrollBarY
+ * @param {number} scrollBarWidth
+ * @param {number} scrollBarHeight
+ * @returns {boolean}
+ */
+function isMouseOverScrollBarArea(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight) {
+  return mouseX >= scrollBarX && mouseX <= scrollBarX + scrollBarWidth &&
+         mouseY >= scrollBarY && mouseY <= scrollBarY + scrollBarHeight;
+}
+
+/**
+ * Get scrollbar dimensions for interaction
+ * @returns {Object | null}
+ */
+function getScrollBarDimensions() {
+  if (editorWallHeight <= height) return null;
+  
+  let scrollBarWidth = 20;
+  let scrollBarX = width - scrollBarWidth - 5;
+  let scrollBarY = 10;
+  let scrollBarHeight = height - 20;
+  
+  let contentRatio = height / editorWallHeight;
+  let thumbHeight = max(scrollBarHeight * contentRatio, 30);
+  let scrollProgress = abs(editorCameraOffsetY) / (editorWallHeight - height);
+  scrollProgress = constrain(scrollProgress, 0, 1);
+  let thumbY = scrollBarY + scrollProgress * (scrollBarHeight - thumbHeight);
+  
+  return {
+    x: scrollBarX,
+    y: scrollBarY,
+    width: scrollBarWidth,
+    height: scrollBarHeight,
+    thumbY: thumbY,
+    thumbHeight: thumbHeight
+  };
 }
 
 /**
@@ -764,7 +816,25 @@ function updateHoldInfo() {
 }
 
 function mousePressed() {
-  // Only process mouse clicks that are within the canvas bounds
+  // Check if clicking on scrollbar first
+  /** @type {any} */
+  let scrollBar = getScrollBarDimensions();
+  if (scrollBar && isMouseOverScrollBarArea(scrollBar.x, scrollBar.y, scrollBar.width, scrollBar.height)) {
+    // Check if clicking on thumb for dragging
+    if (mouseY >= scrollBar.thumbY && mouseY <= scrollBar.thumbY + scrollBar.thumbHeight) {
+      scrollBarDragging = true;
+      scrollBarStartY = mouseY;
+      scrollBarStartCameraY = editorCameraOffsetY;
+    } else {
+      // Click on track - jump to that position
+      let clickRatio = (mouseY - scrollBar.y) / scrollBar.height;
+      let targetCameraY = -clickRatio * (editorWallHeight - height);
+      editorCameraOffsetY = constrain(targetCameraY, -editorWallHeight + height, 0);
+    }
+    return; // Don't process as canvas click
+  }
+
+  // Only process mouse clicks that are within the canvas bounds (excluding scrollbar)
   if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
     return; // Click is outside canvas, ignore it
   }
@@ -832,6 +902,23 @@ function placeEndHold() {
 }
 
 function mouseDragged() {
+  if (scrollBarDragging) {
+    // Handle scrollbar dragging
+    /** @type {any} */
+    let scrollBar = getScrollBarDimensions();
+    if (scrollBar) {
+      let deltaY = mouseY - scrollBarStartY;
+      let scrollRatio = deltaY / scrollBar.height;
+      let cameraChange = scrollRatio * (editorWallHeight - height);
+      editorCameraOffsetY = constrain(
+        scrollBarStartCameraY - cameraChange,
+        -editorWallHeight + height,
+        0
+      );
+    }
+    return;
+  }
+
   if (editorMode === "move" && selectedHold && !selectedHold.top) {
     // Can't move end hold
     let worldMouseX = mouseX;
@@ -852,10 +939,28 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
+  if (scrollBarDragging) {
+    scrollBarDragging = false;
+    return;
+  }
+
   if (isDragging) {
     isDragging = false;
     updateStatus("Hold moved successfully.", "success");
   }
+}
+
+// Touch support for mobile devices
+function touchStarted() {
+  return mousePressed(); // Reuse mouse logic
+}
+
+function touchMoved() {
+  return mouseDragged(); // Reuse mouse logic
+}
+
+function touchEnded() {
+  return mouseReleased(); // Reuse mouse logic
 }
 
 /**
