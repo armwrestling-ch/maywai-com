@@ -87,19 +87,27 @@ function compressLevelData(levelData) {
   // Create a compressed format with shorter property names
   const compressed = {
     n: levelData.name || "Custom Level",
-    a: levelData.author || "Anonymous", 
+    a: levelData.author || "Anonymous",
     h: levelData.wallHeight || 1400,
-    d: levelData.holds.map(/** @param {any} hold */ (hold) => [
-      Math.round(hold.x), 
-      Math.round(hold.y), 
-      hold.top ? 1 : 0
-    ])
+    d: levelData.holds.map(
+      /** @param {any} hold */ (hold) => [
+        Math.round(hold.x),
+        Math.round(hold.y),
+        hold.top ? 1 : 0,
+      ]
+    ),
   };
-  
+
   const compressedStr = JSON.stringify(compressed);
   const originalStr = JSON.stringify(levelData);
-  console.log(`Compression: ${originalStr.length} → ${compressedStr.length} chars (${Math.round(100 - (compressedStr.length/originalStr.length)*100)}% smaller)`);
-  
+  console.log(
+    `Compression: ${originalStr.length} → ${
+      compressedStr.length
+    } chars (${Math.round(
+      100 - (compressedStr.length / originalStr.length) * 100
+    )}% smaller)`
+  );
+
   return compressedStr;
 }
 
@@ -111,17 +119,19 @@ function compressLevelData(levelData) {
 function decompressLevelData(compressedData) {
   try {
     const compressed = JSON.parse(compressedData);
-    
+
     // Convert back to full format
     return {
       name: compressed.n || "Custom Level",
       author: compressed.a || "Anonymous",
       wallHeight: compressed.h || 1400,
-      holds: compressed.d.map(/** @param {any} holdArray */ (holdArray) => ({
-        x: holdArray[0],
-        y: holdArray[1],
-        top: holdArray[2] === 1
-      }))
+      holds: compressed.d.map(
+        /** @param {any} holdArray */ (holdArray) => ({
+          x: holdArray[0],
+          y: holdArray[1],
+          top: holdArray[2] === 1,
+        })
+      ),
     };
   } catch (error) {
     console.error("Failed to decompress level data:", error);
@@ -144,7 +154,7 @@ async function setup() {
   // Check if level data is provided in URL (from "Edit this level" link)
   const urlParams = new URLSearchParams(window.location.search);
   const levelData = urlParams.get("data");
-  
+
   if (levelData) {
     try {
       // Try decompressing first (new format), fallback to old format
@@ -155,7 +165,7 @@ async function setup() {
         // Fallback to old uncompressed format
         decodedData = JSON.parse(decodeURIComponent(levelData));
       }
-      
+
       if (decodedData) {
         loadLevelIntoEditor(decodedData);
         updateStatus("Level loaded for editing!", "success");
@@ -262,7 +272,14 @@ function drawScrollBar() {
   // Highlight thumb if being dragged
   if (scrollBarDragging) {
     fill(80, 80, 80, 220); // Darker when dragging
-  } else if (isMouseOverScrollBarArea(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight)) {
+  } else if (
+    isMouseOverScrollBarArea(
+      scrollBarX,
+      scrollBarY,
+      scrollBarWidth,
+      scrollBarHeight
+    )
+  ) {
     fill(120, 120, 120, 200); // Lighter when hovered
   } else {
     fill(100, 100, 100, 180); // Normal state
@@ -303,9 +320,18 @@ function drawScrollBar() {
  * @param {number} scrollBarHeight
  * @returns {boolean}
  */
-function isMouseOverScrollBarArea(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight) {
-  return mouseX >= scrollBarX && mouseX <= scrollBarX + scrollBarWidth &&
-         mouseY >= scrollBarY && mouseY <= scrollBarY + scrollBarHeight;
+function isMouseOverScrollBarArea(
+  scrollBarX,
+  scrollBarY,
+  scrollBarWidth,
+  scrollBarHeight
+) {
+  return (
+    mouseX >= scrollBarX &&
+    mouseX <= scrollBarX + scrollBarWidth &&
+    mouseY >= scrollBarY &&
+    mouseY <= scrollBarY + scrollBarHeight
+  );
 }
 
 /**
@@ -314,25 +340,25 @@ function isMouseOverScrollBarArea(scrollBarX, scrollBarY, scrollBarWidth, scroll
  */
 function getScrollBarDimensions() {
   if (editorWallHeight <= height) return null;
-  
+
   let scrollBarWidth = 20;
   let scrollBarX = width - scrollBarWidth - 5;
   let scrollBarY = 10;
   let scrollBarHeight = height - 20;
-  
+
   let contentRatio = height / editorWallHeight;
   let thumbHeight = max(scrollBarHeight * contentRatio, 30);
   let scrollProgress = abs(editorCameraOffsetY) / (editorWallHeight - height);
   scrollProgress = constrain(scrollProgress, 0, 1);
   let thumbY = scrollBarY + scrollProgress * (scrollBarHeight - thumbHeight);
-  
+
   return {
     x: scrollBarX,
     y: scrollBarY,
     width: scrollBarWidth,
     height: scrollBarHeight,
     thumbY: thumbY,
-    thumbHeight: thumbHeight
+    thumbHeight: thumbHeight,
   };
 }
 
@@ -637,7 +663,7 @@ function loadLevelIntoEditor(levelData) {
 
   // Load level data
   editorHolds = [...levelData.holds];
-  hasEndHold = editorHolds.some(hold => hold.top);
+  hasEndHold = editorHolds.some((hold) => hold.top);
 
   // Set level name and author
   if (levelData.name && levelNameInput) {
@@ -752,10 +778,7 @@ function setEditorMode(mode) {
     }
   } else if (mode === "remove") {
     removeHoldBtn?.classList.add("active");
-    updateStatus(
-      "Click on holds to remove them.",
-      "info"
-    );
+    updateStatus("Click on holds to remove them.", "info");
   } else if (mode === "move") {
     moveHoldBtn?.classList.add("active");
     updateStatus(
@@ -807,7 +830,9 @@ function updateHoldInfo() {
     }
   }
 
-  info += `End hold: ${editorHolds.some(hold => hold.top) ? "Placed" : "Not placed"}\n`;
+  info += `End hold: ${
+    editorHolds.some((hold) => hold.top) ? "Placed" : "Not placed"
+  }\n`;
   info += `Floor Y: ${Math.round(floorY)}px`;
 
   if (holdInfoDiv) {
@@ -819,9 +844,20 @@ function mousePressed() {
   // Check if clicking on scrollbar first
   /** @type {any} */
   let scrollBar = getScrollBarDimensions();
-  if (scrollBar && isMouseOverScrollBarArea(scrollBar.x, scrollBar.y, scrollBar.width, scrollBar.height)) {
+  if (
+    scrollBar &&
+    isMouseOverScrollBarArea(
+      scrollBar.x,
+      scrollBar.y,
+      scrollBar.width,
+      scrollBar.height
+    )
+  ) {
     // Check if clicking on thumb for dragging
-    if (mouseY >= scrollBar.thumbY && mouseY <= scrollBar.thumbY + scrollBar.thumbHeight) {
+    if (
+      mouseY >= scrollBar.thumbY &&
+      mouseY <= scrollBar.thumbY + scrollBar.thumbHeight
+    ) {
       scrollBarDragging = true;
       scrollBarStartY = mouseY;
       scrollBarStartCameraY = editorCameraOffsetY;
@@ -829,7 +865,11 @@ function mousePressed() {
       // Click on track - jump to that position
       let clickRatio = (mouseY - scrollBar.y) / scrollBar.height;
       let targetCameraY = -clickRatio * (editorWallHeight - height);
-      editorCameraOffsetY = constrain(targetCameraY, -editorWallHeight + height, 0);
+      editorCameraOffsetY = constrain(
+        targetCameraY,
+        -editorWallHeight + height,
+        0
+      );
     }
     return; // Don't process as canvas click
   }
@@ -838,7 +878,7 @@ function mousePressed() {
   /** @type {any} */
   let scrollBarArea = getScrollBarDimensions();
   let maxClickX = scrollBarArea ? scrollBarArea.x : width; // Exclude scrollbar area from clickable region
-  
+
   if (mouseX < 0 || mouseX > maxClickX || mouseY < 0 || mouseY > height) {
     return; // Click is outside valid canvas area, ignore it
   }
@@ -867,7 +907,7 @@ function mouseWheel(event) {
 }
 
 function placeEndHold() {
-  let hasEndHoldPlaced = editorHolds.some(hold => hold.top);
+  let hasEndHoldPlaced = editorHolds.some((hold) => hold.top);
   if (hasEndHoldPlaced) {
     updateStatus("End hold already placed!", "error");
     return;
@@ -1009,7 +1049,7 @@ function addHold(x, y) {
   /** @type {any} */
   let scrollBarArea = getScrollBarDimensions();
   let maxX = scrollBarArea ? scrollBarArea.x - 10 : width - 10; // Keep holds away from scrollbar
-  
+
   x = constrain(x, 10, maxX);
   y = constrain(y, 10, editorWallHeight - 10);
 
@@ -1283,16 +1323,25 @@ function shareLevel() {
   let levelData = createLevelData();
   let compressedLevel = compressLevelData(levelData);
   let encodedLevel = encodeURIComponent(compressedLevel);
-  let shareUrl = `${window.location.origin}${window.location.pathname.replace('level-editor.html', 'index.html')}?level=custom&data=${encodedLevel}`;
+  let shareUrl = `${window.location.origin}${window.location.pathname.replace(
+    "level-editor.html",
+    "index.html"
+  )}?level=custom&data=${encodedLevel}`;
 
   // Copy to clipboard
-  navigator.clipboard.writeText(shareUrl).then(() => {
-    updateStatus("Shareable URL copied to clipboard!", "success");
-  }).catch(() => {
-    // Fallback: show the URL in a prompt for manual copying
-    prompt("Share this URL with others to let them play your level:", shareUrl);
-    updateStatus("Shareable URL generated!", "success");
-  });
+  navigator.clipboard
+    .writeText(shareUrl)
+    .then(() => {
+      updateStatus("Shareable URL copied to clipboard!", "success");
+    })
+    .catch(() => {
+      // Fallback: show the URL in a prompt for manual copying
+      prompt(
+        "Share this URL with others to let them play your level:",
+        shareUrl
+      );
+      updateStatus("Shareable URL generated!", "success");
+    });
 }
 
 function importLevel() {
@@ -1348,16 +1397,16 @@ function clearLevel() {
     editorHolds = []; // Clear all holds
     selectedHold = null;
     hasEndHold = false;
-    
+
     // Clear the URL parameters to start fresh
     const url = new URL(window.location.href);
-    url.searchParams.delete('data');
+    url.searchParams.delete("data");
     window.history.replaceState({}, document.title, url.pathname);
-    
+
     // Clear input fields
     if (levelNameInput) levelNameInput.value = "Custom Level";
     if (authorNameInput) authorNameInput.value = "";
-    
+
     updateWallHeight();
     updateFloorPosition();
     updateStatus(

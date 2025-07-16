@@ -378,15 +378,17 @@ function compressLevelData(levelData) {
   // Create a compressed format with shorter property names
   const compressed = {
     n: levelData.name || "Custom Level",
-    a: levelData.author || "Anonymous", 
+    a: levelData.author || "Anonymous",
     h: levelData.wallHeight || 1400,
-    d: levelData.holds.map(/** @param {any} hold */ (hold) => [
-      Math.round(hold.x), 
-      Math.round(hold.y), 
-      hold.top ? 1 : 0
-    ])
+    d: levelData.holds.map(
+      /** @param {any} hold */ (hold) => [
+        Math.round(hold.x),
+        Math.round(hold.y),
+        hold.top ? 1 : 0,
+      ]
+    ),
   };
-  
+
   return JSON.stringify(compressed);
 }
 
@@ -398,17 +400,19 @@ function compressLevelData(levelData) {
 function decompressLevelData(compressedData) {
   try {
     const compressed = JSON.parse(compressedData);
-    
+
     // Convert back to full format
     return {
       name: compressed.n || "Custom Level",
       author: compressed.a || "Anonymous",
       wallHeight: compressed.h || 1400,
-      holds: compressed.d.map(/** @param {any} holdArray */ (holdArray) => ({
-        x: holdArray[0],
-        y: holdArray[1],
-        top: holdArray[2] === 1
-      }))
+      holds: compressed.d.map(
+        /** @param {any} holdArray */ (holdArray) => ({
+          x: holdArray[0],
+          y: holdArray[1],
+          top: holdArray[2] === 1,
+        })
+      ),
     };
   } catch (error) {
     console.error("Failed to decompress level data:", error);
@@ -456,7 +460,7 @@ async function setup() {
           // Fallback to old uncompressed format
           levelData = JSON.parse(decodeURIComponent(customLevelData));
         }
-        
+
         if (levelData) {
           loadCustomLevel(levelData);
           return;
@@ -467,7 +471,7 @@ async function setup() {
         console.error("Failed to load custom level from URL:", error);
       }
     }
-    
+
     // Fallback: try to load from localStorage for backward compatibility
     const storedLevelData = localStorage.getItem("customLevel");
     if (storedLevelData) {
@@ -1300,7 +1304,7 @@ function loadCustomLevel(levelData) {
 
   // Store the level data for editing
   currentCustomLevelData = levelData;
-  
+
   // Show the edit link and hide the create link
   const editLinkDiv = document.getElementById("editLevelLink");
   const createLinkDiv = document.getElementById("createLevelLink");
@@ -1310,6 +1314,27 @@ function loadCustomLevel(levelData) {
   if (createLinkDiv) {
     createLinkDiv.style.display = "none";
   }
+
+  // Hide the level dropdown and show custom level info
+  const levelSelect = document.getElementById("levelSelect");
+  if (levelSelect) {
+    levelSelect.style.display = "none";
+  }
+
+  // Create or update custom level info display
+  let customLevelInfo = document.getElementById("customLevelInfo");
+  if (!customLevelInfo) {
+    customLevelInfo = document.createElement("div");
+    customLevelInfo.id = "customLevelInfo";
+    customLevelInfo.style.cssText =
+      "margin-bottom: 10px; padding: 8px; background: #f0f0f0; border-radius: 4px; font-size: 14px; text-align: center;";
+    levelSelect?.parentNode?.insertBefore(customLevelInfo, levelSelect);
+  }
+
+  const customLevelName = levelData.name || "Custom Level";
+  const customAuthorName = levelData.author || "Anonymous";
+  customLevelInfo.innerHTML = `<strong>${customLevelName}</strong><br><small>by ${customAuthorName}</small>`;
+  customLevelInfo.style.display = "block";
 
   holds = [];
   topHold = null;
@@ -1383,6 +1408,9 @@ function loadCustomLevel(levelData) {
     `Custom level loaded. Camera positioned at: ${cameraOffsetY}, Climber at: ${climber.torso.y}`
   );
 
+  // Update HTML title to include level name and author
+  document.title = `${customLevelName} by ${customAuthorName} - Climbing Game`;
+
   isAnimating = false; // Reset animation state
   loop();
 }
@@ -1405,6 +1433,17 @@ function loadLevel(levelName) {
   }
   if (createLinkDiv) {
     createLinkDiv.style.display = "block";
+  }
+
+  // Show the level dropdown and hide custom level info
+  const levelSelect = document.getElementById("levelSelect");
+  if (levelSelect) {
+    levelSelect.style.display = "inline-block";
+  }
+
+  const customLevelInfo = document.getElementById("customLevelInfo");
+  if (customLevelInfo) {
+    customLevelInfo.style.display = "none";
   }
 
   holds = [];
@@ -1444,6 +1483,10 @@ function loadLevel(levelName) {
   currentHeight = 0;
 
   cameraOffsetY = -climber.torso.y + height / 2;
+
+  // Reset HTML title to default for built-in levels
+  document.title = "Climbing Game";
+
   isAnimating = false; // Reset animation state
   loop();
 }
