@@ -754,6 +754,45 @@ function draw() {
     18
   );
 
+  // Draw green dot indicator for selected limb attachment point (hidden during victory)
+  if (selectedLimb && !gameWon) {
+    fill("#6CBF6C"); // Light green matching reachable holds
+    noStroke();
+    
+    // Calculate attachment point for the selected limb
+    let baseTorsoX = climber.torso.x;
+    let baseTorsoY = dancingTorsoY;
+    
+    if (gameWon) {
+      baseTorsoX += torsoXOffset;
+      baseTorsoY += torsoYOffset;
+    }
+    
+    const torsoWidth = 36;
+    const torsoHeight = 74;
+    const inset = 9; // Same inset as used in limb attachment calculation
+    
+    let dotX = baseTorsoX;
+    let dotY = baseTorsoY;
+    
+    if (selectedLimb === "leftArm") {
+      dotX = baseTorsoX - torsoWidth / 2 + inset;
+      dotY = baseTorsoY - torsoHeight / 2 + inset;
+    } else if (selectedLimb === "rightArm") {
+      dotX = baseTorsoX + torsoWidth / 2 - inset;
+      dotY = baseTorsoY - torsoHeight / 2 + inset;
+    } else if (selectedLimb === "leftLeg") {
+      dotX = baseTorsoX - torsoWidth / 2 + inset;
+      dotY = baseTorsoY + torsoHeight / 2 - inset;
+    } else if (selectedLimb === "rightLeg") {
+      dotX = baseTorsoX + torsoWidth / 2 - inset;
+      dotY = baseTorsoY + torsoHeight / 2 - inset;
+    }
+    
+    // Draw the green dot
+    ellipse(dotX, dotY, 8, 8);
+  }
+
   // Draw head as a circle above the torso with dance animation
   fill(220, 180, 140, 255); // Skin tone color
   noStroke();
