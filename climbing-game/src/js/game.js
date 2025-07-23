@@ -47,6 +47,10 @@ let torsoPushed = false; // Track if torso has been manually pushed
 let animationSpeed = 0.22; // How fast animations complete (0.1 = slower, 0.3 = faster)
 let isAnimating = false; // Prevent input during animations
 
+// Victory dance variables
+let danceOffset = 0; // For dancing animation
+let danceSpeed = 0.05; // Speed of the dance (reduced from 0.1 for slower motion)
+
 /**
  * @type {Partial<Record<LimbName, HTMLButtonElement>>}
  */
@@ -559,6 +563,31 @@ function draw() {
     ellipse(h.x, h.y, 20, 20);
   }
 
+  // Calculate dance offsets for victory animation (moved before limb drawing)
+  let torsoXOffset = 0;
+  let torsoYOffset = 0;
+  let headXOffset = 0;
+  let headYOffset = 0;
+  let pushRelaxOffset = 0;
+  let dancingTorsoY = climber.torso.y; // Default to normal position
+  
+  if (gameWon) {
+    // Update dance animation
+    danceOffset += danceSpeed;
+    
+    // Create slower dancing motion with sine waves
+    torsoXOffset = sin(danceOffset * 4) * 2; // Slower side to side movement (reduced from 8 to 4)
+    torsoYOffset = abs(sin(danceOffset * 6)) * 1; // Slower bouncing (reduced from 12 to 6)
+    headXOffset = sin(danceOffset * 5) * 1.5; // Slower head sway (reduced from 10 to 5)
+    headYOffset = abs(sin(danceOffset * 8)) * 1; // Slower head bounce (reduced from 15 to 8)
+    
+    // Add push/relax motion - slow up and down movement like pressing push button
+    pushRelaxOffset = sin(danceOffset * 2) * 8; // Very slow push/relax motion (every 3+ seconds)
+    
+    // Apply push/relax offset to the torso position
+    dancingTorsoY = climber.torso.y + pushRelaxOffset;
+  }
+
   // Draw limbs
   for (let limb in climber.limbs) {
     let hold = climber.limbs[/** @type {LimbName} */ (limb)].hold;
@@ -576,24 +605,34 @@ function draw() {
       }
 
       // Calculate limb attachment point based on limb type
-      let attachmentX = climber.torso.x;
-      let attachmentY = climber.torso.y;
+      // Use dancing torso position if game is won
+      let baseTorsoX = climber.torso.x;
+      let baseTorsoY = climber.torso.y;
+      
+      if (gameWon) {
+        // Apply dance animation to torso position for limb calculations
+        baseTorsoX += torsoXOffset;
+        baseTorsoY = dancingTorsoY + torsoYOffset;
+      }
+      
+      let attachmentX = baseTorsoX;
+      let attachmentY = baseTorsoY;
       const torsoWidth = 36;
       const torsoHeight = 74;
       const inset = 9; // Move attachment points 9px towards center
 
       if (limb === "leftArm") {
-        attachmentX = climber.torso.x - torsoWidth / 2 + inset;
-        attachmentY = climber.torso.y - torsoHeight / 2 + inset;
+        attachmentX = baseTorsoX - torsoWidth / 2 + inset;
+        attachmentY = baseTorsoY - torsoHeight / 2 + inset;
       } else if (limb === "rightArm") {
-        attachmentX = climber.torso.x + torsoWidth / 2 - inset;
-        attachmentY = climber.torso.y - torsoHeight / 2 + inset;
+        attachmentX = baseTorsoX + torsoWidth / 2 - inset;
+        attachmentY = baseTorsoY - torsoHeight / 2 + inset;
       } else if (limb === "leftLeg") {
-        attachmentX = climber.torso.x - torsoWidth / 2 + inset;
-        attachmentY = climber.torso.y + torsoHeight / 2 - inset;
+        attachmentX = baseTorsoX - torsoWidth / 2 + inset;
+        attachmentY = baseTorsoY + torsoHeight / 2 - inset;
       } else if (limb === "rightLeg") {
-        attachmentX = climber.torso.x + torsoWidth / 2 - inset;
-        attachmentY = climber.torso.y + torsoHeight / 2 - inset;
+        attachmentX = baseTorsoX + torsoWidth / 2 - inset;
+        attachmentY = baseTorsoY + torsoHeight / 2 - inset;
       }
 
       // Calculate limb length and direction
@@ -699,20 +738,29 @@ function draw() {
     }
   }
 
-  // Draw torso as rounded rectangle
+  // Draw torso as rounded rectangle with dance animation
   fill(50, 100, 200, 255); // #3264C8
   noStroke();
   rectMode(CENTER);
   // rect(x, y, width, height, topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius)
-  rect(climber.torso.x, climber.torso.y, 36, 74, 18, 18, 18, 18);
+  rect(
+    climber.torso.x + torsoXOffset, 
+    dancingTorsoY + torsoYOffset, 
+    36, 74, 18, 18, 18, 18
+  );
 
-  // Draw head as a circle above the torso
+  // Draw head as a circle above the torso with dance animation
   fill(220, 180, 140, 255); // Skin tone color
   noStroke();
   const torsoHeight = 74;
   const headRadius = 14;
-  const headY = climber.torso.y - torsoHeight / 2 - headRadius - 2; // 2px gap between torso and head
-  ellipse(climber.torso.x, headY, headRadius * 2, headRadius * 2);
+  const headY = dancingTorsoY - torsoHeight / 2 - headRadius - 2; // 2px gap between torso and head
+  ellipse(
+    climber.torso.x + headXOffset, 
+    headY + headYOffset + torsoYOffset, 
+    headRadius * 2, 
+    headRadius * 2
+  );
 
   pop();
 
@@ -736,7 +784,7 @@ function draw() {
     textAlign(CENTER, CENTER);
     text("Victory!", width / 2, 60);
     text(`${totalMoves} moves, ${heightInMeters}m climbed!`, width / 2, 100);
-    noLoop();
+    // Note: noLoop() removed to allow dancing animation
   } else {
     // Only show game stats when not in victory state
     // Draw semi-transparent background for stats
