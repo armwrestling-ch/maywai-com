@@ -528,7 +528,7 @@ function draw() {
 
   // Ensure floor fits within wall boundaries
   const availableFloorSpace = wallHeight - floorY;
-  const floorHeight = Math.min(200, availableFloorSpace); // Cap floor height to fit within wall
+  const floorHeight = Math.min(700, availableFloorSpace); // Cap floor height to fit within wall
 
   if (floorHeight > 0) {
     rect(0, floorY, width, floorHeight);
@@ -890,18 +890,7 @@ function drawScrollBar() {
     scrollBarHeight
   );
 
-  // Draw scroll position indicator text
-  fill(80, 80, 80);
-  noStroke();
-  textAlign(RIGHT, TOP);
-  textSize(10);
-  let currentY = Math.abs(cameraOffsetY);
-  let totalY = wallHeight;
-  text(
-    `${Math.round(currentY)}/${Math.round(totalY)}`,
-    width - scrollBarWidth - 8,
-    5
-  );
+  // Note: Scroll position indicator text is hidden in game mode (only shown in level editor)
 }
 
 /**
