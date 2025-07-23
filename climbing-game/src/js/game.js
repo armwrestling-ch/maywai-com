@@ -570,20 +570,20 @@ function draw() {
   let headYOffset = 0;
   let pushRelaxOffset = 0;
   let dancingTorsoY = climber.torso.y; // Default to normal position
-  
+
   if (gameWon) {
     // Update dance animation
     danceOffset += danceSpeed;
-    
+
     // Create slower dancing motion with sine waves
     torsoXOffset = sin(danceOffset * 4) * 2; // Slower side to side movement (reduced from 8 to 4)
     torsoYOffset = abs(sin(danceOffset * 6)) * 1; // Slower bouncing (reduced from 12 to 6)
     headXOffset = sin(danceOffset * 5) * 1.5; // Slower head sway (reduced from 10 to 5)
     headYOffset = abs(sin(danceOffset * 8)) * 1; // Slower head bounce (reduced from 15 to 8)
-    
+
     // Add push/relax motion - slow up and down movement like pressing push button
     pushRelaxOffset = sin(danceOffset * 2) * 8; // Very slow push/relax motion (every 3+ seconds)
-    
+
     // Apply push/relax offset to the torso position
     dancingTorsoY = climber.torso.y + pushRelaxOffset;
   }
@@ -608,13 +608,13 @@ function draw() {
       // Use dancing torso position if game is won
       let baseTorsoX = climber.torso.x;
       let baseTorsoY = climber.torso.y;
-      
+
       if (gameWon) {
         // Apply dance animation to torso position for limb calculations
         baseTorsoX += torsoXOffset;
         baseTorsoY = dancingTorsoY + torsoYOffset;
       }
-      
+
       let attachmentX = baseTorsoX;
       let attachmentY = baseTorsoY;
       const torsoWidth = 36;
@@ -744,9 +744,14 @@ function draw() {
   rectMode(CENTER);
   // rect(x, y, width, height, topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius)
   rect(
-    climber.torso.x + torsoXOffset, 
-    dancingTorsoY + torsoYOffset, 
-    36, 74, 18, 18, 18, 18
+    climber.torso.x + torsoXOffset,
+    dancingTorsoY + torsoYOffset,
+    36,
+    74,
+    18,
+    18,
+    18,
+    18
   );
 
   // Draw head as a circle above the torso with dance animation
@@ -756,9 +761,9 @@ function draw() {
   const headRadius = 14;
   const headY = dancingTorsoY - torsoHeight / 2 - headRadius - 2; // 2px gap between torso and head
   ellipse(
-    climber.torso.x + headXOffset, 
-    headY + headYOffset + torsoYOffset, 
-    headRadius * 2, 
+    climber.torso.x + headXOffset,
+    headY + headYOffset + torsoYOffset,
+    headRadius * 2,
     headRadius * 2
   );
 
