@@ -167,7 +167,8 @@ const levels = {
 
       // Generate holds layer by layer from bottom to top
       const layerHeight = 100; // Height of each layer
-      const holdsPerLayer = 4; // Target number of holds per layer
+      const holdsPerLayer = 3; // Reduced from 4 to 3 holds per layer
+      const scrollbarAreaWidth = 30; // Area to avoid on the right side for scrollbar
 
       for (
         let layer = 0;
@@ -179,7 +180,9 @@ const levels = {
         let holdsInLayer = 0;
 
         while (holdsInLayer < holdsPerLayer && attemptsForLayer < 50) {
-          let newX = Math.random() * (wallWidth - 2 * holdSize) + holdSize;
+          // Avoid scrollbar area by reducing available width
+          let availableWidth = wallWidth - scrollbarAreaWidth - 2 * holdSize;
+          let newX = Math.random() * availableWidth + holdSize;
           let newY = layerY + (Math.random() - 0.5) * layerHeight * 0.8; // Some vertical variation
 
           if (isValidPosition(newX, newY, h) && isClimbable(newX, newY, h)) {
@@ -190,10 +193,12 @@ const levels = {
         }
       }
 
-      // Add some additional random holds to fill gaps
+      // Add some additional random holds to fill gaps (reduced amount)
       let additionalAttempts = 0;
-      while (h.length < 100 && additionalAttempts < 200) {
-        let newX = Math.random() * (wallWidth - 2 * holdSize) + holdSize;
+      while (h.length < 70 && additionalAttempts < 150) { // Reduced from 100 to 70 holds, attempts from 200 to 150
+        // Avoid scrollbar area by reducing available width
+        let availableWidth = wallWidth - scrollbarAreaWidth - 2 * holdSize;
+        let newX = Math.random() * availableWidth + holdSize;
         let newY = Math.random() * (wallHeight - 800) + 100; // Changed from 300 to 800 to account for more bottom space
 
         if (isValidPosition(newX, newY, h) && isClimbable(newX, newY, h)) {
