@@ -29,6 +29,12 @@ let gameWon = false;
 let wallHeight = 3000;
 let cameraOffsetY = 0;
 
+// Scrollbar interaction variables
+let gameScrollBarDragging = false;
+let gameScrollBarStartY = 0;
+let gameScrollBarStartCameraY = 0;
+let manualCameraControl = false; // Track if player is manually controlling camera
+
 let selectedLimb = "leftArm";
 let totalMoves = 0;
 let startingHeight = 0;
@@ -710,6 +716,9 @@ function draw() {
 
   pop();
 
+  // Draw scroll bar (after pop so it's not affected by camera transform)
+  drawScrollBar();
+
   updateAnimations();
   updateTorso();
   updateCamera();
@@ -819,13 +828,225 @@ function updateTorso() {
 }
 
 function updateCamera() {
-  const targetY = -climber.torso.y + height / 2;
-  cameraOffsetY = lerp(cameraOffsetY, targetY, 0.08); // Slower camera movement for smoother feel
+  // Only auto-follow the player if not manually controlling the camera
+  if (!manualCameraControl) {
+    const targetY = -climber.torso.y + height / 2;
+    cameraOffsetY = lerp(cameraOffsetY, targetY, 0.08); // Slower camera movement for smoother feel
+  }
   cameraOffsetY = constrain(cameraOffsetY, -wallHeight + height, 0);
+}
+
+function drawScrollBar() {
+  // Only draw scroll bar if content is larger than viewport
+  if (wallHeight <= height) return;
+
+  // Scroll bar dimensions and position (wider for touch)
+  let scrollBarWidth = 20; // Increased from 12 to 20
+  let scrollBarX = width - scrollBarWidth - 5;
+  let scrollBarY = 10;
+  let scrollBarHeight = height - 20; // Leave margins top and bottom
+
+  // Calculate scroll bar track
+  fill(200, 200, 200, 180); // More opaque for better visibility
+  noStroke();
+  rect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight, 8);
+
+  // Calculate thumb position and size
+  let contentRatio = height / wallHeight; // How much of content fits in viewport
+  let thumbHeight = scrollBarHeight * contentRatio;
+  thumbHeight = max(thumbHeight, 30); // Increased minimum thumb height for touch
+
+  // Calculate thumb position based on current camera offset
+  let scrollProgress = abs(cameraOffsetY) / (wallHeight - height);
+  scrollProgress = constrain(scrollProgress, 0, 1);
+  let thumbY = scrollBarY + scrollProgress * (scrollBarHeight - thumbHeight);
+
+  // Highlight thumb if being dragged
+  if (gameScrollBarDragging) {
+    fill(80, 80, 80, 220); // Darker when dragging
+  } else if (
+    isMouseOverScrollBarArea(
+      scrollBarX,
+      scrollBarY,
+      scrollBarWidth,
+      scrollBarHeight
+    )
+  ) {
+    fill(120, 120, 120, 200); // Lighter when hovered
+  } else {
+    fill(100, 100, 100, 180); // Normal state
+  }
+  rect(scrollBarX + 2, thumbY, scrollBarWidth - 4, thumbHeight, 6);
+
+  // Add subtle highlight to thumb for better visual feedback
+  fill(140, 140, 140, 120);
+  rect(scrollBarX + 3, thumbY + 2, scrollBarWidth - 6, 3, 3);
+
+  // Draw level content indicators on scroll bar
+  drawScrollBarIndicators(
+    scrollBarX,
+    scrollBarY,
+    scrollBarWidth,
+    scrollBarHeight
+  );
+
+  // Draw scroll position indicator text
+  fill(80, 80, 80);
+  noStroke();
+  textAlign(RIGHT, TOP);
+  textSize(10);
+  let currentY = Math.abs(cameraOffsetY);
+  let totalY = wallHeight;
+  text(
+    `${Math.round(currentY)}/${Math.round(totalY)}`,
+    width - scrollBarWidth - 8,
+    5
+  );
+}
+
+/**
+ * Check if mouse is over the scrollbar area
+ * @param {number} scrollBarX
+ * @param {number} scrollBarY
+ * @param {number} scrollBarWidth
+ * @param {number} scrollBarHeight
+ * @returns {boolean}
+ */
+function isMouseOverScrollBarArea(
+  scrollBarX,
+  scrollBarY,
+  scrollBarWidth,
+  scrollBarHeight
+) {
+  return (
+    mouseX >= scrollBarX &&
+    mouseX <= scrollBarX + scrollBarWidth &&
+    mouseY >= scrollBarY &&
+    mouseY <= scrollBarY + scrollBarHeight
+  );
+}
+
+/**
+ * Get scrollbar dimensions for interaction
+ * @returns {Object | null}
+ */
+function getScrollBarDimensions() {
+  if (wallHeight <= height) return null;
+
+  let scrollBarWidth = 20;
+  let scrollBarX = width - scrollBarWidth - 5;
+  let scrollBarY = 10;
+  let scrollBarHeight = height - 20;
+
+  let contentRatio = height / wallHeight;
+  let thumbHeight = max(scrollBarHeight * contentRatio, 30);
+  let scrollProgress = abs(cameraOffsetY) / (wallHeight - height);
+  scrollProgress = constrain(scrollProgress, 0, 1);
+  let thumbY = scrollBarY + scrollProgress * (scrollBarHeight - thumbHeight);
+
+  return {
+    x: scrollBarX,
+    y: scrollBarY,
+    width: scrollBarWidth,
+    height: scrollBarHeight,
+    thumbY: thumbY,
+    thumbHeight: thumbHeight,
+  };
+}
+
+/**
+ * @param {number} scrollBarX
+ * @param {number} scrollBarY
+ * @param {number} scrollBarWidth
+ * @param {number} scrollBarHeight
+ */
+function drawScrollBarIndicators(
+  scrollBarX,
+  scrollBarY,
+  scrollBarWidth,
+  scrollBarHeight
+) {
+  // Draw indicators for holds and player on the scroll bar
+
+  // Player indicator
+  let playerPos = map(
+    climber.torso.y,
+    0,
+    wallHeight,
+    scrollBarY,
+    scrollBarY + scrollBarHeight
+  );
+  fill(255, 0, 0); // Red for player
+  noStroke();
+  ellipse(scrollBarX + scrollBarWidth / 2, playerPos, 6, 6);
+
+  // Hold indicators
+  for (let i = 0; i < holds.length; i++) {
+    let hold = holds[i];
+    let holdPos = map(
+      hold.y,
+      0,
+      wallHeight,
+      scrollBarY,
+      scrollBarY + scrollBarHeight
+    );
+
+    if (hold === topHold) {
+      fill(255, 215, 0); // Gold for top hold
+    } else if (i < 4) {
+      fill(76, 175, 80); // Green for starting holds
+    } else {
+      fill(139, 69, 19); // Brown for regular holds
+    }
+
+    ellipse(scrollBarX + scrollBarWidth / 2, holdPos, 4, 4);
+  }
 }
 
 function mousePressed() {
   if (gameWon || isAnimating) return; // Prevent input during animations
+
+  // Check if clicking on scrollbar first
+  /** @type {any} */
+  let scrollBar = getScrollBarDimensions();
+  if (
+    scrollBar &&
+    isMouseOverScrollBarArea(
+      scrollBar.x,
+      scrollBar.y,
+      scrollBar.width,
+      scrollBar.height
+    )
+  ) {
+    // Enable manual camera control
+    manualCameraControl = true;
+
+    // Check if clicking on thumb for dragging
+    if (
+      mouseY >= scrollBar.thumbY &&
+      mouseY <= scrollBar.thumbY + scrollBar.thumbHeight
+    ) {
+      gameScrollBarDragging = true;
+      gameScrollBarStartY = mouseY;
+      scrollBarStartCameraY = cameraOffsetY;
+    } else {
+      // Click on track - jump to that position
+      let clickRatio = (mouseY - scrollBar.y) / scrollBar.height;
+      let targetCameraY = -clickRatio * (wallHeight - height);
+      cameraOffsetY = constrain(targetCameraY, -wallHeight + height, 0);
+    }
+    return; // Don't process as canvas click
+  }
+
+  // Only process mouse clicks that are within the canvas bounds (excluding scrollbar area)
+  /** @type {any} */
+  let scrollBarArea = getScrollBarDimensions();
+  let maxClickX = scrollBarArea ? scrollBarArea.x : width; // Exclude scrollbar area from clickable region
+
+  if (mouseX < 0 || mouseX > maxClickX || mouseY < 0 || mouseY > height) {
+    return; // Click is outside valid canvas area, ignore it
+  }
+
   const worldMouseY = mouseY - cameraOffsetY;
   let nearest = getNearestHold(mouseX, worldMouseY);
   if (
@@ -837,6 +1058,9 @@ function mousePressed() {
       /** @type {LimbName} */ (selectedLimb)
     )
   ) {
+    // When player makes a move, return camera control to auto-follow
+    manualCameraControl = false;
+
     // Check if this is actually a new move (not grabbing the same hold)
     let currentHold =
       climber.limbs[/** @type {LimbName} */ (selectedLimb)].hold;
@@ -910,6 +1134,47 @@ function mousePressed() {
       gameWon = true;
     }
   }
+}
+
+function mouseDragged() {
+  if (gameScrollBarDragging) {
+    // Handle scrollbar dragging
+    /** @type {any} */
+    let scrollBar = getScrollBarDimensions();
+    if (scrollBar) {
+      let deltaY = mouseY - gameScrollBarStartY;
+      let scrollRatio = deltaY / scrollBar.height;
+      let cameraChange = scrollRatio * (wallHeight - height);
+      cameraOffsetY = constrain(
+        scrollBarStartCameraY - cameraChange,
+        -wallHeight + height,
+        0
+      );
+    }
+    return;
+  }
+}
+
+function mouseReleased() {
+  if (gameScrollBarDragging) {
+    gameScrollBarDragging = false;
+    return;
+  }
+}
+
+/**
+ * Add scrolling functionality with mouse wheel
+ * @param {any} event
+ */
+function mouseWheel(event) {
+  // Enable manual camera control when scrolling
+  manualCameraControl = true;
+
+  // Add scrolling functionality within the fixed viewport
+  let scrollSpeed = 20;
+  let newCameraY = cameraOffsetY + event.delta * scrollSpeed;
+  cameraOffsetY = constrain(newCameraY, -wallHeight + height, 0);
+  return false; // Prevent page scrolling
 }
 
 /**
