@@ -1437,6 +1437,12 @@ function createLevelData() {
 
 // Keyboard shortcuts
 function keyPressed() {
+  // Check if user is typing in an input field
+  const activeElement = document.activeElement;
+  if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+    return; // Don't process keyboard shortcuts while typing in input fields
+  }
+
   if (key === "1") setEditorMode("add");
   else if (key === "2") setEditorMode("remove");
   else if (key === "3") setEditorMode("move");
