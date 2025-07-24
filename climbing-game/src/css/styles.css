@@ -80,7 +80,7 @@ body {
 }
 
 #pushUp {
-  grid-area: 2 / 4 / 3 / 5;
+  grid-area: 1 / 3 / 2 / 4;
 }
 #relax {
   grid-area: 1 / 4 / 2 / 5;
@@ -89,7 +89,7 @@ body {
   grid-area: 2 / 3 / 3 / 4;
 }
 #strafeRight {
-  grid-area: 1 / 3 / 2 / 4;
+  grid-area: 2 / 4 / 3 / 5;
 }
 
 .selected {
