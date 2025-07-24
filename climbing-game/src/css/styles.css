@@ -82,13 +82,13 @@ body {
 #pushUp {
   grid-area: 2 / 4 / 3 / 5;
 }
-#strafeLeft {
+#relax {
   grid-area: 1 / 4 / 2 / 5;
 }
-#strafeRight {
+#strafeLeft {
   grid-area: 2 / 3 / 3 / 4;
 }
-#relax {
+#strafeRight {
   grid-area: 1 / 3 / 2 / 4;
 }
 
