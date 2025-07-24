@@ -152,17 +152,74 @@ const levels = {
       function isClimbable(newX, newY, existingHolds) {
         if (existingHolds.length === 0) return true;
 
-        // Check if at least one existing hold is within climbing reach
-        for (let existingHold of existingHolds) {
-          let distance = Math.sqrt(
-            (newX - existingHold.x) ** 2 + (newY - existingHold.y) ** 2
-          );
-          if (distance <= maxReach * 0.8) {
-            // Use 80% of max reach for better connectivity
-            return true;
+        // For a hold to be climbable, we need to simulate realistic climbing scenarios
+        // Check if there are reasonable holds that could support a climber to reach this new hold
+        
+        // Use the same reach values as the actual climber
+        const armReach = climber.limbs.leftArm.reach;
+        const legReach = climber.limbs.leftLeg.reach;
+        
+        // Use the same torso dimensions as used throughout the code
+        const torsoWidth = 36;
+        const torsoHeight = 74;
+        const inset = 9;
+
+        // Look for potential support hold combinations within a reasonable area
+        const searchRadius = 200; // Search area for potential support holds
+        const nearbyHolds = existingHolds.filter(hold => {
+          const distance = Math.sqrt((newX - hold.x) ** 2 + (newY - hold.y) ** 2);
+          return distance <= searchRadius;
+        });
+
+        if (nearbyHolds.length === 0) return false;
+
+        // Try different realistic climbing positions to see if the new hold is reachable
+        for (let supportHold of nearbyHolds) {
+          // Simulate potential torso positions based on the support hold
+          const potentialTorsoPositions = [
+            // Torso above and slightly offset from support hold (hanging from arms)
+            { x: supportHold.x - 20, y: supportHold.y + 80 },
+            { x: supportHold.x + 20, y: supportHold.y + 80 },
+            // Torso below support hold (standing on legs)
+            { x: supportHold.x - 20, y: supportHold.y - 80 },
+            { x: supportHold.x + 20, y: supportHold.y - 80 },
+            // Side positions
+            { x: supportHold.x - 60, y: supportHold.y },
+            { x: supportHold.x + 60, y: supportHold.y }
+          ];
+
+          for (let torsoPos of potentialTorsoPositions) {
+            // Check if any limb from this torso position can reach the new hold
+            const limbPositions = [
+              { x: torsoPos.x - torsoWidth / 2 + inset, y: torsoPos.y - torsoHeight / 2 + inset, reach: armReach }, // left arm
+              { x: torsoPos.x + torsoWidth / 2 - inset, y: torsoPos.y - torsoHeight / 2 + inset, reach: armReach }, // right arm
+              { x: torsoPos.x - torsoWidth / 2 + inset, y: torsoPos.y + torsoHeight / 2 - inset, reach: legReach }, // left leg
+              { x: torsoPos.x + torsoWidth / 2 - inset, y: torsoPos.y + torsoHeight / 2 - inset, reach: legReach }  // right leg
+            ];
+
+            for (let limb of limbPositions) {
+              const distanceToNewHold = Math.sqrt((newX - limb.x) ** 2 + (newY - limb.y) ** 2);
+              if (distanceToNewHold <= limb.reach * 0.9) { // Use 90% of reach for safety margin
+                // Also check if the support hold is reachable from this torso position
+                let supportReachable = false;
+                for (let supportLimb of limbPositions) {
+                  const distanceToSupport = Math.sqrt(
+                    (supportHold.x - supportLimb.x) ** 2 + (supportHold.y - supportLimb.y) ** 2
+                  );
+                  if (distanceToSupport <= supportLimb.reach * 0.9) {
+                    supportReachable = true;
+                    break;
+                  }
+                }
+                if (supportReachable) {
+                  return true; // Found a viable climbing position
+                }
+              }
+            }
           }
         }
-        return false;
+        
+        return false; // No viable climbing position found
       }
 
       // Generate holds layer by layer from bottom to top
@@ -195,7 +252,8 @@ const levels = {
 
       // Add some additional random holds to fill gaps (reduced amount)
       let additionalAttempts = 0;
-      while (h.length < 70 && additionalAttempts < 150) { // Reduced from 100 to 70 holds, attempts from 200 to 150
+      while (h.length < 70 && additionalAttempts < 150) {
+        // Reduced from 100 to 70 holds, attempts from 200 to 150
         // Avoid scrollbar area by reducing available width
         let availableWidth = wallWidth - scrollbarAreaWidth - 2 * holdSize;
         let newX = Math.random() * availableWidth + holdSize;
@@ -763,23 +821,23 @@ function draw() {
   if (selectedLimb && !gameWon) {
     fill("#6CBF6C"); // Light green matching reachable holds
     noStroke();
-    
+
     // Calculate attachment point for the selected limb
     let baseTorsoX = climber.torso.x;
     let baseTorsoY = dancingTorsoY;
-    
+
     if (gameWon) {
       baseTorsoX += torsoXOffset;
       baseTorsoY += torsoYOffset;
     }
-    
+
     const torsoWidth = 36;
     const torsoHeight = 74;
     const inset = 9; // Same inset as used in limb attachment calculation
-    
+
     let dotX = baseTorsoX;
     let dotY = baseTorsoY;
-    
+
     if (selectedLimb === "leftArm") {
       dotX = baseTorsoX - torsoWidth / 2 + inset;
       dotY = baseTorsoY - torsoHeight / 2 + inset;
@@ -793,7 +851,7 @@ function draw() {
       dotX = baseTorsoX + torsoWidth / 2 - inset;
       dotY = baseTorsoY + torsoHeight / 2 - inset;
     }
-    
+
     // Draw the green dot
     ellipse(dotX, dotY, 8, 8);
   }
