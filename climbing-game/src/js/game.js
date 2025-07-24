@@ -313,121 +313,44 @@ function generateLevel() {
   function isClimbable(newX, newY, existingHolds) {
     if (existingHolds.length === 0) return true;
 
-    // For a hold to be climbable, we need to simulate realistic climbing scenarios
-    // A hold is climbable if there's at least one reasonable way to reach it
-    
     // Use the same reach values as the actual climber
     const armReach = climber.limbs.leftArm.reach;
     const legReach = climber.limbs.leftLeg.reach;
+    const maxReach = Math.max(armReach, legReach);
+
+    // Simple but effective approach: ensure the new hold is reachable from existing holds
+    // and that there are enough support holds nearby
     
-    // Use the same torso dimensions as used throughout the code
-    const torsoWidth = 36;
-    const torsoHeight = 74;
-    const inset = 9;
-
-    // More generous search radius to consider more climbing possibilities
-    const searchRadius = Math.max(armReach, legReach) * 2; // About 240px
-    const nearbyHolds = existingHolds.filter(hold => {
-      const distance = Math.sqrt((newX - hold.x) ** 2 + (newY - hold.y) ** 2);
-      return distance <= searchRadius;
-    });
-
-    if (nearbyHolds.length === 0) {
-      // If no nearby holds, check if it's reachable from any single hold
-      // This covers cases where holds are spaced further apart
-      for (let hold of existingHolds) {
-        const distance = Math.sqrt((newX - hold.x) ** 2 + (newY - hold.y) ** 2);
-        if (distance <= Math.max(armReach, legReach) * 1.5) {
-          return true; // Reachable with some stretching
-        }
-      }
-      return false;
-    }
-
-    // Try multiple realistic climbing scenarios
-    for (let supportHold of nearbyHolds) {
-      // Generate more diverse torso positions around the support hold
-      const torsoPositions = [];
-      
-      // Circular positions around the support hold
-      for (let angle = 0; angle < 360; angle += 45) { // Every 45 degrees
-        const radians = (angle * Math.PI) / 180;
-        const distances = [60, 90, 120]; // Multiple distances
-        
-        for (let distance of distances) {
-          torsoPositions.push({
-            x: supportHold.x + Math.cos(radians) * distance,
-            y: supportHold.y + Math.sin(radians) * distance
-          });
-        }
-      }
-
-      // Test each torso position
-      for (let torsoPos of torsoPositions) {
-        // Calculate limb attachment points from this torso position
-        const limbPositions = [
-          { x: torsoPos.x - torsoWidth / 2 + inset, y: torsoPos.y - torsoHeight / 2 + inset, reach: armReach, type: 'arm' },
-          { x: torsoPos.x + torsoWidth / 2 - inset, y: torsoPos.y - torsoHeight / 2 + inset, reach: armReach, type: 'arm' },
-          { x: torsoPos.x - torsoWidth / 2 + inset, y: torsoPos.y + torsoHeight / 2 - inset, reach: legReach, type: 'leg' },
-          { x: torsoPos.x + torsoWidth / 2 - inset, y: torsoPos.y + torsoHeight / 2 - inset, reach: legReach, type: 'leg' }
-        ];
-
-        // Check if any limb can reach the new hold
-        let canReachNewHold = false;
-        for (let limb of limbPositions) {
-          const distanceToNew = Math.sqrt((newX - limb.x) ** 2 + (newY - limb.y) ** 2);
-          if (distanceToNew <= limb.reach * 1.0) { // Use full reach for new holds
-            canReachNewHold = true;
-            break;
-          }
-        }
-
-        if (canReachNewHold) {
-          // Check if we have adequate support from existing holds
-          let supportCount = 0;
-          let hasLegSupport = false;
-          let hasArmSupport = false;
-
-          for (let existingHold of nearbyHolds) {
-            for (let limb of limbPositions) {
-              const distanceToExisting = Math.sqrt(
-                (existingHold.x - limb.x) ** 2 + (existingHold.y - limb.y) ** 2
-              );
-              if (distanceToExisting <= limb.reach * 0.95) { // Slightly more generous for support holds
-                supportCount++;
-                if (limb.type === 'leg') hasLegSupport = true;
-                if (limb.type === 'arm') hasArmSupport = true;
-              }
-            }
-          }
-
-          // We need at least one support point to make a move
-          // Having both arm and leg support is ideal, but not required for all moves
-          if (supportCount >= 1 && (hasLegSupport || hasArmSupport)) {
-            return true;
-          }
-        }
-      }
-    }
-
-    // Fallback: simple distance check for edge cases
-    // If we can't find a complex solution, check if it's within reasonable reach of multiple holds
-    let reachableFromCount = 0;
+    let reachableSupports = 0;
+    let closestDistance = Infinity;
+    
     for (let hold of existingHolds) {
       const distance = Math.sqrt((newX - hold.x) ** 2 + (newY - hold.y) ** 2);
-      if (distance <= Math.max(armReach, legReach) * 1.2) {
-        reachableFromCount++;
+      
+      if (distance < closestDistance) {
+        closestDistance = distance;
+      }
+      
+      // Count holds that are within reasonable reach
+      if (distance <= maxReach * 1.2) { // Allow for 20% stretch
+        reachableSupports++;
       }
     }
-
-    // If reachable from multiple holds, it's probably climbable
-    return reachableFromCount >= 2;
+    
+    // A hold is climbable if:
+    // 1. The closest existing hold is within maximum stretch reach
+    // 2. There are at least 2 holds nearby for support (or 1 if very close)
+    const withinReach = closestDistance <= maxReach * 1.4; // 40% stretch for closest hold
+    const hasSupport = reachableSupports >= 2 || (reachableSupports >= 1 && closestDistance <= maxReach * 0.8);
+    
+    return withinReach && hasSupport;
   }
 
   // Generate holds layer by layer from bottom to top
-  const layerHeight = 100; // Height of each layer
-  const holdsPerLayer = 3; // Reduced from 4 to 3 holds per layer
+  const layerHeight = 80; // Reduced layer height for more layers (was 100)
+  const holdsPerLayer = 4; // Increased back to 4 holds per layer for better climbability
   const scrollbarAreaWidth = 30; // Area to avoid on the right side for scrollbar
+  const availableWidth = wallWidth - scrollbarAreaWidth - 2 * holdSize; // Define outside the loop
 
   for (
     let layer = 0;
@@ -438,11 +361,10 @@ function generateLevel() {
     let attemptsForLayer = 0;
     let holdsInLayer = 0;
 
-    while (holdsInLayer < holdsPerLayer && attemptsForLayer < 50) {
+    while (holdsInLayer < holdsPerLayer && attemptsForLayer < 100) { // Increased attempts
       // Avoid scrollbar area by reducing available width
-      let availableWidth = wallWidth - scrollbarAreaWidth - 2 * holdSize;
       let newX = Math.random() * availableWidth + holdSize;
-      let newY = layerY + (Math.random() - 0.5) * layerHeight * 0.8; // Some vertical variation
+      let newY = layerY + (Math.random() - 0.5) * layerHeight * 0.6; // Reduced variation for more consistent layers
 
       if (isValidPosition(newX, newY, h) && isClimbable(newX, newY, h)) {
         h.push({ x: newX, y: newY });
@@ -450,14 +372,23 @@ function generateLevel() {
       }
       attemptsForLayer++;
     }
+    
+    // If we couldn't place enough holds in this layer, try to place at least one
+    if (holdsInLayer === 0 && attemptsForLayer >= 100) {
+      // Force place at least one hold per layer to ensure progression
+      let fallbackX = 100 + Math.random() * (availableWidth - 100);
+      let fallbackY = layerY;
+      
+      if (isValidPosition(fallbackX, fallbackY, h)) {
+        h.push({ x: fallbackX, y: fallbackY });
+      }
+    }
   }
 
-  // Add some additional random holds to fill gaps (reduced amount)
+  // Add some additional random holds to fill gaps and ensure climbability
   let additionalAttempts = 0;
-  while (h.length < 70 && additionalAttempts < 150) {
-    // Reduced from 100 to 70 holds, attempts from 200 to 150
+  while (h.length < 90 && additionalAttempts < 200) { // Increased from 70 to 90 holds, attempts from 150 to 200
     // Avoid scrollbar area by reducing available width
-    let availableWidth = wallWidth - scrollbarAreaWidth - 2 * holdSize;
     let newX = Math.random() * availableWidth + holdSize;
     let newY = Math.random() * (wallHeight - 800) + 100; // Changed from 300 to 800 to account for more bottom space
 
@@ -467,12 +398,12 @@ function generateLevel() {
     additionalAttempts++;
   }
 
-  // Top hold - ensure it's climbable
+  // Top hold - ensure it's climbable and well-positioned
   let topHoldPlaced = false;
   let topAttempts = 0;
-  while (!topHoldPlaced && topAttempts < 20) {
-    let topX = 150 + Math.random() * 100; // Near center
-    let topY = 40;
+  while (!topHoldPlaced && topAttempts < 30) { // Increased attempts
+    let topX = 120 + Math.random() * 160; // Wider range for better positioning
+    let topY = 30 + Math.random() * 20; // Small Y variation
 
     if (isValidPosition(topX, topY, h) && isClimbable(topX, topY, h)) {
       h.push({ x: topX, y: topY, top: true });
@@ -481,9 +412,27 @@ function generateLevel() {
     topAttempts++;
   }
 
-  // Fallback top hold if placement failed
+  // Fallback top hold if placement failed - try multiple positions
   if (!topHoldPlaced) {
-    h.push({ x: 230, y: 40, top: true });
+    const fallbackPositions = [
+      { x: 200, y: 40 },
+      { x: 150, y: 50 },
+      { x: 250, y: 45 },
+      { x: 180, y: 35 }
+    ];
+    
+    for (let pos of fallbackPositions) {
+      if (isValidPosition(pos.x, pos.y, h) && isClimbable(pos.x, pos.y, h)) {
+        h.push({ x: pos.x, y: pos.y, top: true });
+        topHoldPlaced = true;
+        break;
+      }
+    }
+    
+    // Ultimate fallback - place without climbability check
+    if (!topHoldPlaced) {
+      h.push({ x: 200, y: 40, top: true });
+    }
   }
 
   return h;
