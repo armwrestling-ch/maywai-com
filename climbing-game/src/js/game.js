@@ -320,29 +320,32 @@ function generateLevel() {
 
     // Simple but effective approach: ensure the new hold is reachable from existing holds
     // and that there are enough support holds nearby
-    
+
     let reachableSupports = 0;
     let closestDistance = Infinity;
-    
+
     for (let hold of existingHolds) {
       const distance = Math.sqrt((newX - hold.x) ** 2 + (newY - hold.y) ** 2);
-      
+
       if (distance < closestDistance) {
         closestDistance = distance;
       }
-      
+
       // Count holds that are within reasonable reach
-      if (distance <= maxReach * 1.2) { // Allow for 20% stretch
+      if (distance <= maxReach * 1.2) {
+        // Allow for 20% stretch
         reachableSupports++;
       }
     }
-    
+
     // A hold is climbable if:
     // 1. The closest existing hold is within maximum stretch reach
     // 2. There are at least 2 holds nearby for support (or 1 if very close)
     const withinReach = closestDistance <= maxReach * 1.4; // 40% stretch for closest hold
-    const hasSupport = reachableSupports >= 2 || (reachableSupports >= 1 && closestDistance <= maxReach * 0.8);
-    
+    const hasSupport =
+      reachableSupports >= 2 ||
+      (reachableSupports >= 1 && closestDistance <= maxReach * 0.8);
+
     return withinReach && hasSupport;
   }
 
@@ -361,7 +364,8 @@ function generateLevel() {
     let attemptsForLayer = 0;
     let holdsInLayer = 0;
 
-    while (holdsInLayer < holdsPerLayer && attemptsForLayer < 100) { // Increased attempts
+    while (holdsInLayer < holdsPerLayer && attemptsForLayer < 100) {
+      // Increased attempts
       // Avoid scrollbar area by reducing available width
       let newX = Math.random() * availableWidth + holdSize;
       let newY = layerY + (Math.random() - 0.5) * layerHeight * 0.6; // Reduced variation for more consistent layers
@@ -372,13 +376,13 @@ function generateLevel() {
       }
       attemptsForLayer++;
     }
-    
+
     // If we couldn't place enough holds in this layer, try to place at least one
     if (holdsInLayer === 0 && attemptsForLayer >= 100) {
       // Force place at least one hold per layer to ensure progression
       let fallbackX = 100 + Math.random() * (availableWidth - 100);
       let fallbackY = layerY;
-      
+
       if (isValidPosition(fallbackX, fallbackY, h)) {
         h.push({ x: fallbackX, y: fallbackY });
       }
@@ -387,7 +391,8 @@ function generateLevel() {
 
   // Add some additional random holds to fill gaps and ensure climbability
   let additionalAttempts = 0;
-  while (h.length < 90 && additionalAttempts < 200) { // Increased from 70 to 90 holds, attempts from 150 to 200
+  while (h.length < 90 && additionalAttempts < 200) {
+    // Increased from 70 to 90 holds, attempts from 150 to 200
     // Avoid scrollbar area by reducing available width
     let newX = Math.random() * availableWidth + holdSize;
     let newY = Math.random() * (wallHeight - 800) + 100; // Changed from 300 to 800 to account for more bottom space
@@ -401,7 +406,8 @@ function generateLevel() {
   // Top hold - ensure it's climbable and well-positioned
   let topHoldPlaced = false;
   let topAttempts = 0;
-  while (!topHoldPlaced && topAttempts < 30) { // Increased attempts
+  while (!topHoldPlaced && topAttempts < 30) {
+    // Increased attempts
     let topX = 120 + Math.random() * 160; // Wider range for better positioning
     let topY = 30 + Math.random() * 20; // Small Y variation
 
@@ -418,9 +424,9 @@ function generateLevel() {
       { x: 200, y: 40 },
       { x: 150, y: 50 },
       { x: 250, y: 45 },
-      { x: 180, y: 35 }
+      { x: 180, y: 35 },
     ];
-    
+
     for (let pos of fallbackPositions) {
       if (isValidPosition(pos.x, pos.y, h) && isClimbable(pos.x, pos.y, h)) {
         h.push({ x: pos.x, y: pos.y, top: true });
@@ -428,7 +434,7 @@ function generateLevel() {
         break;
       }
     }
-    
+
     // Ultimate fallback - place without climbability check
     if (!topHoldPlaced) {
       h.push({ x: 200, y: 40, top: true });
