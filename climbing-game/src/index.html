@@ -8,15 +8,33 @@
   </head>
   <body>
     <div id="ui">
-      <button class="limb-button" id="leftArm">💪 Left (1)</button>
-      <button class="limb-button" id="rightArm">💪 Right (2)</button><br />
-      <button class="limb-button" id="leftLeg">🦵 Left (3)</button>
-      <button class="limb-button" id="rightLeg">🦵 Right (4)</button><br />
-      <button class="body-button" id="push">⬆️ (5)</button>
-      <button class="body-button" id="strafeLeft">⬅️ (6)</button>
-      <button class="body-button" id="strafeRight">➡️ (7)</button>
-      <button class="body-button" id="relax">↩️ (8)</button>
-      <br /><br />
+      <div class="button-controls">
+        <button class="limb-button" id="leftArm">
+          <span class="icon">💪</span><br />left (1)
+        </button>
+        <button class="limb-button" id="rightArm">
+          <span class="icon">💪</span><br />right (2)
+        </button>
+        <button class="limb-button" id="leftLeg">
+          <span class="icon">🦵</span><br />left (3)
+        </button>
+        <button class="limb-button" id="rightLeg">
+          <span class="icon">🦵</span><br />right (4)
+        </button>
+        <button class="torso-button" id="push">
+          <span class="icon">⬆️</span><br />push (5)
+        </button>
+        <button class="torso-button" id="relax">
+          <span class="icon">↩️</span><br />relax (8)
+        </button>
+        <button class="torso-button" id="strafeLeft">
+          <span class="icon">⬅️</span><br />left (6)
+        </button>
+        <button class="torso-button" id="strafeRight">
+          <span class="icon">➡️</span><br />right (7)
+        </button>
+      </div>
+      <select id="levelSelect"></select>
       <div id="editLevelLink" style="display: none; margin-bottom: 10px">
         <a
           href="#"
@@ -25,15 +43,11 @@
           >✏️ Edit this level</a
         >
       </div>
-      <div id="createLevelLink" style="display: block; margin-bottom: 10px">
-        <a
-          href="./level-editor.html"
-          target="_blank"
-          style="color: #2196f3; text-decoration: underline; font-size: 14px"
-          >🏗️ Create your own level</a
+      <div id="createLevelLink">
+        <a href="./level-editor.html" target="_blank" class="create-level-link"
+          >🏗️ Create a level</a
         >
       </div>
-      <select id="levelSelect"></select>
     </div>
     <div id="gameContainer">
       <!-- Canvas will be created by p5.js -->
