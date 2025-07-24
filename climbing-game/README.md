@@ -4,7 +4,7 @@ A browser-based climbing game built with p5.js where players control a climber t
 
 ## How to Play
 
-1. Open `src/index.html` in your browser
+1. Open [the Climbing Game](./src/index.html) in your browser
 2. Select a limb (left arm, right arm, left leg, right leg) using buttons or number keys (1-4)
 3. Click on holds to move the selected limb
 4. Use torso controls to push up (5), strafe left (6), strafe right (7), or relax (8)
@@ -14,7 +14,7 @@ A browser-based climbing game built with p5.js where players control a climber t
 
 Create your own custom climbing levels with the built-in level editor:
 
-1. Open `src/level-editor.html` in your browser
+1. Open [the Level Editor](./src/level-editor.html) in your browser
 2. Start by placing 4 starting holds at the bottom of the wall
 3. Use mouse wheel to scroll up and down the level canvas
 4. Add more holds as needed - they cannot be placed below the floor
@@ -63,14 +63,6 @@ Create your own custom climbing levels with the built-in level editor:
 - **T**: Test level
 - **E**: Export level
 - **C**: Clear level
-
-## Technical Details
-
-- Built with p5.js for canvas rendering
-- Responsive design with CSS scaling
-- Animation system with easing
-- Physics-based limb reach validation
-- LocalStorage for custom level testing
 
 ## Level Format
 

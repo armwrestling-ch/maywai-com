@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc --project tsconfig.json",
     "initialize": "tsc --init",
-    "start": "npx http-server -c-1 --ext nonexistent -o -p 3000 ./src/"
+    "dev": "npx http-server -c-1 --ext nonexistent -o -p 3000 ./src/"
   },
   "repository": {
     "type": "git",
