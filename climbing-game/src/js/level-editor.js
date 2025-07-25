@@ -1439,7 +1439,10 @@ function createLevelData() {
 function keyPressed() {
   // Check if user is typing in an input field
   const activeElement = document.activeElement;
-  if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+  if (
+    activeElement &&
+    (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")
+  ) {
     return; // Don't process keyboard shortcuts while typing in input fields
   }
 
