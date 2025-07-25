@@ -115,10 +115,10 @@ function generateLevel() {
 
   // Starting holds - manually placed to ensure good starting position
   // Moved up from bottom to give more space below (was 2830, 2850, 2920, 2950)
-  h.push({ x: 130, y: 2420 }); // left leg
-  h.push({ x: 200, y: 2450 }); // right leg
   h.push({ x: 150, y: 2330 }); // left arm
   h.push({ x: 240, y: 2350 }); // right arm
+  h.push({ x: 130, y: 2420 }); // left leg
+  h.push({ x: 200, y: 2450 }); // right leg
 
   // Function to check if a new hold position is valid
   /**
@@ -1630,7 +1630,7 @@ function loadCustomLevel(levelData) {
     return;
   }
 
-  // Assign starting holds to limbs
+  // Assign starting holds to limbs (same order as level editor: arms first)
   climber.limbs.leftArm.hold = startingHolds[0];
   climber.limbs.rightArm.hold = startingHolds[1];
   climber.limbs.leftLeg.hold = startingHolds[2];
@@ -1715,10 +1715,10 @@ function loadLevel(levelName) {
     holds.push(hold);
   }
 
-  climber.limbs.leftLeg.hold = holds[0];
-  climber.limbs.rightLeg.hold = holds[1];
-  climber.limbs.leftArm.hold = holds[2];
-  climber.limbs.rightArm.hold = holds[3];
+  climber.limbs.leftArm.hold = holds[0];
+  climber.limbs.rightArm.hold = holds[1];
+  climber.limbs.leftLeg.hold = holds[2];
+  climber.limbs.rightLeg.hold = holds[3];
 
   // Initialize target holds to null
   climber.limbs.leftArm.targetHold = null;

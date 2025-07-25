@@ -16,10 +16,10 @@ const gameLevels = {
     wallHeight: 1400,
     holds: [
       // Starting holds repositioned to center the player better with more floor space
-      { x: 130, y: 850 }, // left leg
-      { x: 180, y: 820 }, // right leg
       { x: 150, y: 700 }, // left arm
       { x: 190, y: 700 }, // right arm
+      { x: 130, y: 850 }, // left leg
+      { x: 180, y: 820 }, // right leg
 
       // Second layer
       { x: 90, y: 700 },
