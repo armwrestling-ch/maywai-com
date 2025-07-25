@@ -9,14 +9,6 @@
  * @type {Record<string, any>}
  */
 const gameLevels = {
-  generated: {
-    order: 1,
-    name: "Challenge",
-    author: "Generator",
-    wallHeight: 3000,
-    holds: [], // Will be populated by generateLevel() function
-  },
-
   default: {
     order: 0,
     name: "Easy Wall",
@@ -64,110 +56,12 @@ const gameLevels = {
     ],
   },
 
-  galaxus: {
-    order: 2,
-    name: "GALAXUS Wall",
-    author: "Mättu",
-    wallHeight: 2500,
-    holds: [
-      // --- STARTING HOLDS ---
-      { x: 170, y: 1720 }, // left leg
-      { x: 230, y: 1720 }, // right leg
-      { x: 180, y: 1650 }, // left arm
-      { x: 220, y: 1650 }, // right arm
-
-      // --- G (y: 1480 - 1600) - Mirrored on X-axis and adjusted
-      { x: 240, y: 1480 },
-      { x: 210, y: 1480 },
-      { x: 180, y: 1480 }, // Bottom bar
-      { x: 160, y: 1500 },
-      { x: 150, y: 1530 },
-      { x: 150, y: 1560 }, // Left side
-      { x: 160, y: 1590 },
-      { x: 180, y: 1600 },
-      { x: 210, y: 1600 }, // Top bar
-      { x: 240, y: 1590 }, // Right side upper
-      { x: 240, y: 1560 }, // Right side middle
-      { x: 210, y: 1560 }, // Inner bar
-
-      // --- A (y: 1300 - 1420) - Closer to G
-      { x: 200, y: 1300 }, // Top point
-      { x: 180, y: 1330 },
-      { x: 160, y: 1360 },
-      { x: 140, y: 1390 },
-      { x: 120, y: 1420 }, // Left leg
-      { x: 220, y: 1330 },
-      { x: 240, y: 1360 },
-      { x: 260, y: 1390 },
-      { x: 280, y: 1420 }, // Right leg
-      // Cross-bar adjusted to avoid overlap
-      { x: 160, y: 1380 },
-      { x: 200, y: 1380 },
-      { x: 240, y: 1380 },
-
-      // --- L (y: 1120 - 1210) - Closer to A
-      { x: 150, y: 1120 },
-      { x: 150, y: 1150 },
-      { x: 150, y: 1180 },
-      { x: 150, y: 1210 }, // Vertical bar
-      { x: 180, y: 1210 },
-      { x: 210, y: 1210 },
-      { x: 240, y: 1210 }, // Horizontal bar
-
-      // --- A (y: 920 - 1040) - Closer to L
-      { x: 200, y: 920 }, // Top point
-      { x: 180, y: 950 },
-      { x: 160, y: 980 },
-      { x: 140, y: 1010 },
-      { x: 120, y: 1040 }, // Left leg
-      { x: 220, y: 950 },
-      { x: 240, y: 980 },
-      { x: 260, y: 1010 },
-      { x: 280, y: 1040 }, // Right leg
-      // Cross-bar adjusted to avoid overlap
-      { x: 160, y: 1000 },
-      { x: 200, y: 1000 },
-      { x: 240, y: 1000 },
-
-      // --- X (y: 720 - 840) - Closer to A
-      { x: 150, y: 720 },
-      { x: 170, y: 750 },
-      { x: 200, y: 780 },
-      { x: 230, y: 810 },
-      { x: 250, y: 840 }, // Diagonal \
-      { x: 250, y: 720 },
-      { x: 230, y: 750 },
-      { x: 170, y: 810 },
-      { x: 150, y: 840 }, // Diagonal /
-
-      // --- U (y: 520 - 640) - Closer to X
-      { x: 150, y: 520 },
-      { x: 150, y: 550 },
-      { x: 150, y: 580 }, // Left side
-      { x: 165, y: 610 },
-      { x: 180, y: 630 },
-      { x: 200, y: 640 },
-      { x: 220, y: 630 },
-      { x: 235, y: 610 }, // Curve
-      { x: 250, y: 580 },
-      { x: 250, y: 550 },
-      { x: 250, y: 520 }, // Right side
-
-      // --- S (y: 320 - 440) - Closer to U
-      { x: 250, y: 320 },
-      { x: 220, y: 320 },
-      { x: 190, y: 330 },
-      { x: 160, y: 350 }, // Top curve
-      { x: 180, y: 380 },
-      { x: 210, y: 410 },
-      { x: 240, y: 430 }, // Middle
-      { x: 220, y: 440 },
-      { x: 190, y: 440 },
-      { x: 160, y: 430 }, // Bottom curve
-
-      // --- TOP HOLD ---
-      { x: 200, y: 250, top: true },
-    ],
+  generated: {
+    order: 1,
+    name: "Challenge",
+    author: "Generator",
+    wallHeight: 3000,
+    holds: [], // Will be populated by generateLevel() function
   },
 
   touchingTheSky: {
@@ -856,6 +750,139 @@ const gameLevels = {
         x: 200,
         y: 690,
         top: true,
+      },
+    ],
+  },
+
+  v17: {
+    name: "V17 Boulder",
+    author: "Mättu",
+    wallHeight: 1700,
+    holds: [
+      {
+        x: 168,
+        y: 1373,
+        top: false,
+      },
+      {
+        x: 232,
+        y: 1381,
+        top: false,
+      },
+      {
+        x: 84,
+        y: 1479,
+        top: false,
+      },
+      {
+        x: 306,
+        y: 1468,
+        top: false,
+      },
+      {
+        x: 184,
+        y: 1271,
+        top: false,
+      },
+      {
+        x: 109,
+        y: 955,
+        top: false,
+      },
+      {
+        x: 159,
+        y: 750,
+        top: false,
+      },
+      {
+        x: 204,
+        y: 312,
+        top: false,
+      },
+      {
+        x: 178,
+        y: 169,
+        top: false,
+      },
+      {
+        x: 114,
+        y: 432,
+        top: false,
+      },
+      {
+        x: 160,
+        y: 624,
+        top: false,
+      },
+      {
+        x: 160,
+        y: 687,
+        top: false,
+      },
+      {
+        x: 157,
+        y: 811,
+        top: false,
+      },
+      {
+        x: 200,
+        y: 119,
+        top: true,
+      },
+      {
+        x: 288,
+        y: 1253,
+        top: false,
+      },
+      {
+        x: 338,
+        y: 1189,
+        top: false,
+      },
+      {
+        x: 175,
+        y: 1041,
+        top: false,
+      },
+      {
+        x: 285,
+        y: 1086,
+        top: false,
+      },
+      {
+        x: 237,
+        y: 1056,
+        top: false,
+      },
+      {
+        x: 222,
+        y: 925,
+        top: false,
+      },
+      {
+        x: 176,
+        y: 517,
+        top: false,
+      },
+      {
+        x: 51,
+        y: 897,
+        top: false,
+      },
+      {
+        x: 93,
+        y: 517,
+        top: false,
+      },
+      {
+        x: 117,
+        y: 308,
+        top: false,
+      },
+      {
+        x: 203,
+        y: 265,
+        top: false,
       },
     ],
   },
