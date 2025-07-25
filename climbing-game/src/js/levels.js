@@ -732,4 +732,131 @@ const gameLevels = {
       },
     ],
   },
+  hangInThere: {
+    name: "Hang in there",
+    author: "Martin",
+    wallHeight: 1554,
+    holds: [
+      {
+        x: 97,
+        y: 1374,
+        top: false,
+      },
+      {
+        x: 152,
+        y: 1373,
+        top: false,
+      },
+      {
+        x: 96,
+        y: 1404,
+        top: false,
+      },
+      {
+        x: 150,
+        y: 1400,
+        top: false,
+      },
+      {
+        x: 89,
+        y: 1301,
+        top: false,
+      },
+      {
+        x: 148,
+        y: 1267,
+        top: false,
+      },
+      {
+        x: 209,
+        y: 1241,
+        top: false,
+      },
+      {
+        x: 281,
+        y: 1230,
+        top: false,
+      },
+      {
+        x: 350,
+        y: 1225,
+        top: false,
+      },
+      {
+        x: 353,
+        y: 1163,
+        top: false,
+      },
+      {
+        x: 356,
+        y: 1108,
+        top: false,
+      },
+      {
+        x: 356,
+        y: 1048,
+        top: false,
+      },
+      {
+        x: 356,
+        y: 979,
+        top: false,
+      },
+      {
+        x: 297,
+        y: 939,
+        top: false,
+      },
+      {
+        x: 248,
+        y: 905,
+        top: false,
+      },
+      {
+        x: 189,
+        y: 870,
+        top: false,
+      },
+      {
+        x: 132,
+        y: 836,
+        top: false,
+      },
+      {
+        x: 84,
+        y: 810,
+        top: false,
+      },
+      {
+        x: 260,
+        y: 1325,
+        top: false,
+      },
+      {
+        x: 244,
+        y: 981,
+        top: false,
+      },
+      {
+        x: 87,
+        y: 740,
+        top: false,
+      },
+      {
+        x: 170,
+        y: 1086,
+        top: false,
+      },
+      {
+        x: 303,
+        y: 1127,
+        top: false,
+      },
+      {
+        x: 200,
+        y: 690,
+        top: true,
+      },
+    ],
+  },
 };
