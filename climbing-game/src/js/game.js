@@ -401,9 +401,14 @@ async function setup() {
         console.error("Failed to load custom level from localStorage:", error);
       }
     }
+  } else if (customLevel && levels[customLevel]) {
+    // Load regular level from URL parameter
+    loadLevel(customLevel);
+    return;
   }
 
-  loadLevel("default");
+  // Load default level and update URL
+  loadLevel("default", true, true); // updateUrl=true, replaceHistory=true
 }
 
 function draw() {
@@ -1516,6 +1521,22 @@ function keyPressed() {
   updateButtonStyles();
 }
 
+/**
+ * Update the level select dropdown to show the currently loaded level
+ * @param {string} levelName
+ */
+function updateLevelSelect(levelName) {
+  const levelSelect = /** @type {HTMLSelectElement | null} */ (
+    document.getElementById("levelSelect")
+  );
+  if (levelSelect) {
+    levelSelect.value = levelName;
+  }
+}
+
+/**
+ * Populate the level select dropdown with available levels
+ */
 function populateLevelSelect() {
   const levelSelect = document.getElementById("levelSelect");
   if (!levelSelect) {
@@ -1541,7 +1562,8 @@ function populateLevelSelect() {
       console.error("Event target is not a select element");
       return;
     }
-    loadLevel(event.target.value);
+    const selectedLevel = event.target.value;
+    loadLevel(selectedLevel, true); // Pass true to update URL
   });
 }
 
@@ -1672,9 +1694,11 @@ function loadCustomLevel(levelData) {
 /**
  * Load a level by name
  * @param {string} levelName
+ * @param {boolean} updateUrl - Whether to update the URL (default: false)
+ * @param {boolean} replaceHistory - Whether to replace current history entry instead of adding new one (default: false)
  * @returns
  */
-function loadLevel(levelName) {
+function loadLevel(levelName, updateUrl = false, replaceHistory = false) {
   let level = levels[levelName];
   if (!level) return;
 
@@ -1740,6 +1764,20 @@ function loadLevel(levelName) {
 
   // Reset HTML title to default for built-in levels
   document.title = "Climbing Game";
+
+  // Update the dropdown to show the currently loaded level
+  updateLevelSelect(levelName);
+
+  // Update URL if requested (e.g., when user selects from dropdown)
+  if (updateUrl) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("level", levelName);
+    if (replaceHistory) {
+      window.history.replaceState({}, "", url.toString());
+    } else {
+      window.history.pushState({}, "", url.toString());
+    }
+  }
 
   isAnimating = false; // Reset animation state
   loop();

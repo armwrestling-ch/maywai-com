@@ -65,6 +65,7 @@ const gameLevels = {
   },
 
   touchingTheSky: {
+    order: 2,
     name: "Touching the Sky",
     author: "Chrigu",
     wallHeight: 2452.94921875,
@@ -627,6 +628,7 @@ const gameLevels = {
     ],
   },
   hangInThere: {
+    order: 3,
     name: "Hang in there",
     author: "Martin",
     wallHeight: 1554,
@@ -755,6 +757,7 @@ const gameLevels = {
   },
 
   v17: {
+    order: 4,
     name: "V17 Boulder",
     author: "Mättu",
     wallHeight: 1700,
