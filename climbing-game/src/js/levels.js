@@ -889,4 +889,91 @@ const gameLevels = {
       },
     ],
   },
+  zigZag: {
+    name: "Zigzag Boulder",
+    author: "Mättu",
+    wallHeight: 1031,
+    holds: [
+      {
+        x: 20,
+        y: 721,
+        top: false,
+      },
+      {
+        x: 55,
+        y: 718,
+        top: false,
+      },
+      {
+        x: 16,
+        y: 796,
+        top: false,
+      },
+      {
+        x: 172,
+        y: 796,
+        top: false,
+      },
+      {
+        x: 145,
+        y: 704,
+        top: false,
+      },
+      {
+        x: 226,
+        y: 708,
+        top: false,
+      },
+      {
+        x: 358,
+        y: 783,
+        top: false,
+      },
+      {
+        x: 307,
+        y: 664,
+        top: false,
+      },
+      {
+        x: 331,
+        y: 572,
+        top: false,
+      },
+      {
+        x: 307,
+        y: 503,
+        top: false,
+      },
+      {
+        x: 346,
+        y: 444,
+        top: false,
+      },
+      {
+        x: 185,
+        y: 363,
+        top: false,
+      },
+      {
+        x: 129,
+        y: 453,
+        top: false,
+      },
+      {
+        x: 284,
+        y: 389,
+        top: false,
+      },
+      {
+        x: 14,
+        y: 291,
+        top: false,
+      },
+      {
+        x: 200,
+        y: 241,
+        top: true,
+      },
+    ],
+  },
 };
