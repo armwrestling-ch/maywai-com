@@ -1108,4 +1108,146 @@ const gameLevels = {
       },
     ],
   },
+  keiAhnig: {
+    name: "Kei Ahnig vo Chlätere",
+    author: "Jasmin",
+    wallHeight: 1494,
+    holds: [
+      {
+        x: 135,
+        y: 1343,
+        top: false,
+      },
+      {
+        x: 196,
+        y: 1344,
+        top: false,
+      },
+      {
+        x: 80,
+        y: 1323,
+        top: false,
+      },
+      {
+        x: 254,
+        y: 1317,
+        top: false,
+      },
+      {
+        x: 206,
+        y: 1263,
+        top: false,
+      },
+      {
+        x: 114,
+        y: 1245,
+        top: false,
+      },
+      {
+        x: 257,
+        y: 1137,
+        top: false,
+      },
+      {
+        x: 187,
+        y: 1163,
+        top: false,
+      },
+      {
+        x: 72,
+        y: 1156,
+        top: false,
+      },
+      {
+        x: 111,
+        y: 1053,
+        top: false,
+      },
+      {
+        x: 212,
+        y: 1055,
+        top: false,
+      },
+      {
+        x: 178,
+        y: 937,
+        top: false,
+      },
+      {
+        x: 205,
+        y: 936,
+        top: false,
+      },
+      {
+        x: 93,
+        y: 909,
+        top: false,
+      },
+      {
+        x: 303,
+        y: 905,
+        top: false,
+      },
+      {
+        x: 185,
+        y: 818,
+        top: false,
+      },
+      {
+        x: 345,
+        y: 1015,
+        top: false,
+      },
+      {
+        x: 352,
+        y: 1230,
+        top: false,
+      },
+      {
+        x: 185,
+        y: 716,
+        top: false,
+      },
+      {
+        x: 183,
+        y: 660,
+        top: false,
+      },
+      {
+        x: 179,
+        y: 603,
+        top: false,
+      },
+      {
+        x: 177,
+        y: 548,
+        top: false,
+      },
+      {
+        x: 200,
+        y: 498,
+        top: true,
+      },
+      {
+        x: 87,
+        y: 747,
+        top: false,
+      },
+      {
+        x: 220,
+        y: 762,
+        top: false,
+      },
+      {
+        x: 85,
+        y: 608,
+        top: false,
+      },
+      {
+        x: 257,
+        y: 564,
+        top: false,
+      },
+    ],
+  },
 };
