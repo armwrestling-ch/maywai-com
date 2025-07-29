@@ -1250,4 +1250,161 @@ const gameLevels = {
       },
     ],
   },
+  neunC: {
+    name: "9C",
+    author: "Sany",
+    wallHeight: 1700,
+    holds: [
+      {
+        x: 190,
+        y: 1388,
+        top: false,
+      },
+      {
+        x: 255,
+        y: 1412,
+        top: false,
+      },
+      {
+        x: 123,
+        y: 1490,
+        top: false,
+      },
+      {
+        x: 157,
+        y: 1503,
+        top: false,
+      },
+      {
+        x: 192,
+        y: 1128,
+        top: false,
+      },
+      {
+        x: 136,
+        y: 1228,
+        top: false,
+      },
+      {
+        x: 78,
+        y: 1110,
+        top: false,
+      },
+      {
+        x: 49,
+        y: 1128,
+        top: false,
+      },
+      {
+        x: 76,
+        y: 1008,
+        top: false,
+      },
+      {
+        x: 122,
+        y: 899,
+        top: false,
+      },
+      {
+        x: 160,
+        y: 980,
+        top: false,
+      },
+      {
+        x: 96,
+        y: 1339,
+        top: false,
+      },
+      {
+        x: 199,
+        y: 1286,
+        top: false,
+      },
+      {
+        x: 204,
+        y: 835,
+        top: false,
+      },
+      {
+        x: 282,
+        y: 988,
+        top: false,
+      },
+      {
+        x: 306,
+        y: 989,
+        top: false,
+      },
+      {
+        x: 309,
+        y: 856,
+        top: false,
+      },
+      {
+        x: 322,
+        y: 638,
+        top: false,
+      },
+      {
+        x: 288,
+        y: 632,
+        top: false,
+      },
+      {
+        x: 242,
+        y: 539,
+        top: false,
+      },
+      {
+        x: 203,
+        y: 502,
+        top: false,
+      },
+      {
+        x: 98,
+        y: 505,
+        top: false,
+      },
+      {
+        x: 201,
+        y: 631,
+        top: false,
+      },
+      {
+        x: 61,
+        y: 433,
+        top: false,
+      },
+      {
+        x: 87,
+        y: 417,
+        top: false,
+      },
+      {
+        x: 101,
+        y: 321,
+        top: false,
+      },
+      {
+        x: 133,
+        y: 329,
+        top: false,
+      },
+      {
+        x: 309,
+        y: 758,
+        top: false,
+      },
+      {
+        x: 339,
+        y: 855,
+        top: false,
+      },
+      {
+        x: 200,
+        y: 271,
+        top: true,
+      },
+    ],
+  },
 };
