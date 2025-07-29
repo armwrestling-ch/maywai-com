@@ -976,4 +976,136 @@ const gameLevels = {
       },
     ],
   },
+  esSibni: {
+    name: "Sehr wohrschinli es 7i",
+    author: "Luca",
+    wallHeight: 1058,
+    holds: [
+      {
+        x: 333,
+        y: 728,
+        top: false,
+      },
+      {
+        x: 273,
+        y: 782,
+        top: false,
+      },
+      {
+        x: 257,
+        y: 669,
+        top: false,
+      },
+      {
+        x: 206,
+        y: 732,
+        top: false,
+      },
+      {
+        x: 294,
+        y: 817,
+        top: false,
+      },
+      {
+        x: 215,
+        y: 561,
+        top: false,
+      },
+      {
+        x: 292,
+        y: 550,
+        top: false,
+      },
+      {
+        x: 247,
+        y: 499,
+        top: false,
+      },
+      {
+        x: 79,
+        y: 615,
+        top: false,
+      },
+      {
+        x: 317,
+        y: 491,
+        top: false,
+      },
+      {
+        x: 335,
+        y: 776,
+        top: false,
+      },
+      {
+        x: 238,
+        y: 823,
+        top: false,
+      },
+      {
+        x: 318,
+        y: 635,
+        top: false,
+      },
+      {
+        x: 262,
+        y: 615,
+        top: false,
+      },
+      {
+        x: 138,
+        y: 540,
+        top: false,
+      },
+      {
+        x: 124,
+        y: 583,
+        top: false,
+      },
+      {
+        x: 62,
+        y: 506,
+        top: false,
+      },
+      {
+        x: 34,
+        y: 565,
+        top: false,
+      },
+      {
+        x: 86,
+        y: 440,
+        top: false,
+      },
+      {
+        x: 25,
+        y: 432,
+        top: false,
+      },
+      {
+        x: 79,
+        y: 361,
+        top: false,
+      },
+      {
+        x: 44,
+        y: 335,
+        top: false,
+      },
+      {
+        x: 159,
+        y: 320,
+        top: false,
+      },
+      {
+        x: 200,
+        y: 285,
+        top: true,
+      },
+      {
+        x: 158,
+        y: 354,
+        top: false,
+      },
+    ],
+  },
 };
