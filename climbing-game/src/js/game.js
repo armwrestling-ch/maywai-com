@@ -1553,7 +1553,7 @@ function populateLevelSelect() {
       option.innerText =
         (level.name || key) +
         ` - by ${level.author}` +
-        ` (~${Math.round((level.wallHeight - 850) / 10) / 10}m)`;
+        ` (~${Math.round((level.wallHeight - 650) / 10) / 10}m)`;
       levelSelect.appendChild(option);
     });
 
