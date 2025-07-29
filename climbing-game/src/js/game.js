@@ -1550,10 +1550,26 @@ function populateLevelSelect() {
     .forEach(([key, level]) => {
       const option = document.createElement("option");
       option.value = key;
+
+      // Calculate actual climbing height based on hold positions
+      let climbingHeight = 0;
+      const torsoHeightCompensation = 115;
+      if (level.holds && level.holds.length > 0) {
+        // Find the bottommost hold (highest Y value)
+        let bottomY = Math.max(...level.holds.map((hold) => hold.y));
+        // Find the topmost hold (lowest Y value)
+        let topY = Math.min(...level.holds.map((hold) => hold.y));
+        // Calculate the actual climbing distance
+        climbingHeight = (bottomY - topY - torsoHeightCompensation) / 10; // Convert pixels to meters (10px = 1m)
+      } else {
+        // Fallback to old calculation for levels without holds
+        climbingHeight = (level.wallHeight - 650) / 10;
+      }
+
       option.innerText =
         (level.name || key) +
         ` - by ${level.author}` +
-        ` (~${Math.round((level.wallHeight - 650) / 10) / 10}m)`;
+        ` (~${Math.round(climbingHeight) / 10}m)`;
       levelSelect.appendChild(option);
     });
 
