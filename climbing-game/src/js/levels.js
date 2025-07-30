@@ -1407,4 +1407,256 @@ const gameLevels = {
       },
     ],
   },
+  miguel: {
+    name: "Miguel",
+    author: "Miguel",
+    wallHeight: 1547.47265625,
+    holds: [
+      {
+        x: 138,
+        y: 1320,
+        top: false,
+      },
+      {
+        x: 192,
+        y: 1317,
+        top: false,
+      },
+      {
+        x: 185,
+        y: 1367,
+        top: false,
+      },
+      {
+        x: 172,
+        y: 1397,
+        top: false,
+      },
+      {
+        x: 189,
+        y: 1253,
+        top: false,
+      },
+      {
+        x: 152,
+        y: 1235,
+        top: false,
+      },
+      {
+        x: 219,
+        y: 1235,
+        top: false,
+      },
+      {
+        x: 220,
+        y: 1291,
+        top: false,
+      },
+      {
+        x: 151,
+        y: 1287,
+        top: false,
+      },
+      {
+        x: 181,
+        y: 1136,
+        top: false,
+      },
+      {
+        x: 181,
+        y: 1165,
+        top: false,
+      },
+      {
+        x: 183,
+        y: 1196,
+        top: false,
+      },
+      {
+        x: 180,
+        y: 1105,
+        top: false,
+      },
+      {
+        x: 203,
+        y: 981,
+        top: false,
+      },
+      {
+        x: 172,
+        y: 978,
+        top: false,
+      },
+      {
+        x: 140,
+        y: 977,
+        top: false,
+      },
+      {
+        x: 139,
+        y: 1007,
+        top: false,
+      },
+      {
+        x: 139,
+        y: 1036,
+        top: false,
+      },
+      {
+        x: 142,
+        y: 1064,
+        top: false,
+      },
+      {
+        x: 180,
+        y: 1062,
+        top: false,
+      },
+      {
+        x: 205,
+        y: 1057,
+        top: false,
+      },
+      {
+        x: 202,
+        y: 1025,
+        top: false,
+      },
+      {
+        x: 176,
+        y: 1021,
+        top: false,
+      },
+      {
+        x: 135,
+        y: 705,
+        top: false,
+      },
+      {
+        x: 133,
+        y: 736,
+        top: false,
+      },
+      {
+        x: 133,
+        y: 770,
+        top: false,
+      },
+      {
+        x: 133,
+        y: 801,
+        top: false,
+      },
+      {
+        x: 165,
+        y: 708,
+        top: false,
+      },
+      {
+        x: 198,
+        y: 711,
+        top: false,
+      },
+      {
+        x: 161,
+        y: 754,
+        top: false,
+      },
+      {
+        x: 193,
+        y: 755,
+        top: false,
+      },
+      {
+        x: 162,
+        y: 806,
+        top: false,
+      },
+      {
+        x: 191,
+        y: 804,
+        top: false,
+      },
+      {
+        x: 141,
+        y: 585,
+        top: false,
+      },
+      {
+        x: 141,
+        y: 613,
+        top: false,
+      },
+      {
+        x: 137,
+        y: 642,
+        top: false,
+      },
+      {
+        x: 139,
+        y: 668,
+        top: false,
+      },
+      {
+        x: 166,
+        y: 671,
+        top: false,
+      },
+      {
+        x: 194,
+        y: 667,
+        top: false,
+      },
+      {
+        x: 125,
+        y: 851,
+        top: false,
+      },
+      {
+        x: 125,
+        y: 877,
+        top: false,
+      },
+      {
+        x: 123,
+        y: 909,
+        top: false,
+      },
+      {
+        x: 122,
+        y: 934,
+        top: false,
+      },
+      {
+        x: 152,
+        y: 937,
+        top: false,
+      },
+      {
+        x: 187,
+        y: 939,
+        top: false,
+      },
+      {
+        x: 187,
+        y: 908,
+        top: false,
+      },
+      {
+        x: 186,
+        y: 880,
+        top: false,
+      },
+      {
+        x: 186,
+        y: 854,
+        top: false,
+      },
+      {
+        x: 200,
+        y: 535,
+        top: true,
+      },
+    ],
+  },
 };
