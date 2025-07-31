@@ -1659,4 +1659,271 @@ const gameLevels = {
       },
     ],
   },
+  davos: {
+    name: "DAVOS",
+    author: "Hitsch Heldstab",
+    wallHeight: 2262.12109375,
+    holds: [
+      {
+        x: 151,
+        y: 1989,
+        top: false,
+      },
+      {
+        x: 222,
+        y: 1991,
+        top: false,
+      },
+      {
+        x: 150,
+        y: 2112,
+        top: false,
+      },
+      {
+        x: 228,
+        y: 2112,
+        top: false,
+      },
+      {
+        x: 71,
+        y: 1993,
+        top: false,
+      },
+      {
+        x: 312,
+        y: 1989,
+        top: false,
+      },
+      {
+        x: 86,
+        y: 1920,
+        top: false,
+      },
+      {
+        x: 165,
+        y: 1881,
+        top: false,
+      },
+      {
+        x: 236,
+        y: 1885,
+        top: false,
+      },
+      {
+        x: 292,
+        y: 1931,
+        top: false,
+      },
+      {
+        x: 52,
+        y: 1698,
+        top: false,
+      },
+      {
+        x: 134,
+        y: 1746,
+        top: false,
+      },
+      {
+        x: 233,
+        y: 1789,
+        top: false,
+      },
+      {
+        x: 322,
+        y: 1815,
+        top: false,
+      },
+      {
+        x: 139,
+        y: 1640,
+        top: false,
+      },
+      {
+        x: 231,
+        y: 1614,
+        top: false,
+      },
+      {
+        x: 328,
+        y: 1590,
+        top: false,
+      },
+      {
+        x: 228,
+        y: 1692,
+        top: false,
+      },
+      {
+        x: 26,
+        y: 1574,
+        top: false,
+      },
+      {
+        x: 136,
+        y: 1530,
+        top: false,
+      },
+      {
+        x: 230,
+        y: 1508,
+        top: false,
+      },
+      {
+        x: 340,
+        y: 1477,
+        top: false,
+      },
+      {
+        x: 230,
+        y: 1412,
+        top: false,
+      },
+      {
+        x: 133,
+        y: 1372,
+        top: false,
+      },
+      {
+        x: 31,
+        y: 1329,
+        top: false,
+      },
+      {
+        x: 316,
+        y: 1261,
+        top: false,
+      },
+      {
+        x: 232,
+        y: 1317,
+        top: false,
+      },
+      {
+        x: 130,
+        y: 1315,
+        top: false,
+      },
+      {
+        x: 35,
+        y: 1229,
+        top: false,
+      },
+      {
+        x: 74,
+        y: 1129,
+        top: false,
+      },
+      {
+        x: 175,
+        y: 1108,
+        top: false,
+      },
+      {
+        x: 283,
+        y: 1124,
+        top: false,
+      },
+      {
+        x: 325,
+        y: 1195,
+        top: false,
+      },
+      {
+        x: 67,
+        y: 1273,
+        top: false,
+      },
+      {
+        x: 74,
+        y: 914,
+        top: false,
+      },
+      {
+        x: 30,
+        y: 975,
+        top: false,
+      },
+      {
+        x: 86,
+        y: 1052,
+        top: false,
+      },
+      {
+        x: 174,
+        y: 1027,
+        top: false,
+      },
+      {
+        x: 202,
+        y: 948,
+        top: false,
+      },
+      {
+        x: 289,
+        y: 911,
+        top: false,
+      },
+      {
+        x: 344,
+        y: 973,
+        top: false,
+      },
+      {
+        x: 322,
+        y: 1044,
+        top: false,
+      },
+      {
+        x: 194,
+        y: 834,
+        top: false,
+      },
+      {
+        x: 192,
+        y: 764,
+        top: false,
+      },
+      {
+        x: 184,
+        y: 709,
+        top: false,
+      },
+      {
+        x: 193,
+        y: 587,
+        top: false,
+      },
+      {
+        x: 224,
+        y: 661,
+        top: false,
+      },
+      {
+        x: 249,
+        y: 607,
+        top: false,
+      },
+      {
+        x: 282,
+        y: 564,
+        top: false,
+      },
+      {
+        x: 200,
+        y: 502,
+        top: true,
+      },
+      {
+        x: 145,
+        y: 795,
+        top: false,
+      },
+      {
+        x: 232,
+        y: 721,
+        top: false,
+      },
+    ],
+  },
 };
